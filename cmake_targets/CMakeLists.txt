@@ -743,6 +743,13 @@ set(HWLIB_BLADERF_SOURCE
 add_library(oai_bladerfdevif MODULE ${HWLIB_BLADERF_SOURCE} )
 target_link_libraries(oai_bladerfdevif bladeRF)
 
+include_directories("${OPENAIR_TARGETS}/ARCH/OXGRF/USERSPACE/LIB/")
+set(HWLIB_OXGRF_SOURCE
+  ${OPENAIR_TARGETS}/ARCH/OXGRF/USERSPACE/LIB/oxgrf_lib.c
+  )
+add_library(oai_oxgrfdevif MODULE ${HWLIB_OXGRF_SOURCE} )
+target_link_libraries(oai_oxgrfdevif oxgrf_ss)
+
 include_directories("${OPENAIR_TARGETS}/ARCH/LMSSDR/USERSPACE/LIB/")
 
 set(HWLIB_LMSSDR_SOURCE
@@ -3021,7 +3028,7 @@ if (${T_TRACER})
         nr_ulschsim ldpctest polartest smallblocktest cu_test du_test
         #all "add_library" definitions
         ITTI RRC_LIB NR_RRC_LIB S1AP_LIB S1AP_ENB X2AP_LIB X2AP_ENB M2AP_LIB M2AP_ENB M3AP_LIB M3AP_ENB F1AP_LIB F1AP
-        params_libconfig oai_exmimodevif oai_usrpdevif oai_bladerfdevif oai_lmssdrdevif oai_iqplayer
+        params_libconfig oai_exmimodevif oai_usrpdevif oai_bladerfdevif oai_lmssdrdevif oai_iqplayer oai_oxgrfdevif
         oai_eth_transpro oai_mobipass coding FLPT_MSG FLEXRAN_AGENT HASHTABLE UTIL OMG_SUMO
         SECU_OSA SECU_CN SCHED_LIB SCHED_NR_LIB SCHED_RU_LIB SCHED_UE_LIB SCHED_NR_UE_LIB default_sched remote_sched RAL
         NFAPI_COMMON_LIB NFAPI_LIB NFAPI_PNF_LIB NFAPI_VNF_LIB NFAPI_USER_LIB
