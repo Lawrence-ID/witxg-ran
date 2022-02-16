@@ -51,6 +51,7 @@ const char* devtype_names[MAX_RF_DEV_TYPE] = {
   "USRP N300",
   "USRP X400",
   "BLADERF",
+  "OXGRF_DEV",
   "LMSSDR",
   "IRIS",
   "No HW",

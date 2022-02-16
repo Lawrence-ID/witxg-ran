@@ -94,6 +94,8 @@ typedef enum {
   USRP_X400_DEV,
   /*!\brief device is BLADE RF*/
   BLADERF_DEV,
+  /*!\brief device is OXGRF pcie*/
+  OXGRF_DEV,
   /*!\brief device is LMSSDR (SoDeRa)*/
   LMSSDR_DEV,
   /*!\brief device is Iris */
@@ -211,7 +213,7 @@ typedef struct {
   //! timing_source
   clock_source_t time_source;
   //! Manual SDR IP address
-  //#if defined(EXMIMO) || defined(OAI_USRP) || defined(OAI_BLADERF) || defined(OAI_LMSSDR)
+  //#if defined(EXMIMO) || defined(OAI_USRP) || defined(OAI_BLADERF) || defined(OAI_LMSSDR) || defined(OAI_OXGRF)
   char *sdr_addrs;
   //! Auto calibration flag
   int autocal[4];
