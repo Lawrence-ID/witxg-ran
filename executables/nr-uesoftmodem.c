@@ -372,8 +372,8 @@ void init_openair0(void) {
 
     openair0_cfg[card].configFilename = get_softmodem_params()->rf_config_file;
 
-    if (usrp_args) openair0_cfg[card].sdr_addrs = usrp_args;
-    else if (oxgrf_args) openair0_cfg[card].sdr_addrs = oxgrf_args;
+    if (oxgrf_args) openair0_cfg[card].sdr_addrs = oxgrf_args;
+    else if (usrp_args) openair0_cfg[card].sdr_addrs = usrp_args;
 
   }
 }

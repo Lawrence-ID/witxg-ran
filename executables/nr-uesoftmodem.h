@@ -30,7 +30,7 @@
 /*------------------------------------------------------------------------------------------------------------------------------------------*/
 #define CMDLINE_NRUEPARAMS_DESC {  \
     {"usrp-args",                CONFIG_HLP_USRP_ARGS,   0,               strptr:(char **)&usrp_args,         defstrval:"type=b200", TYPE_STRING,   0},    \
-    {"oxgrf-args",              CONFIG_HLP_OXGRF_ARGS, 0,               strptr:(char **)&oxgrf_args,       defstrval:"dev=pciex:0", TYPE_STRING,   0},    \
+    {"oxgrf-args",               CONFIG_HLP_OXGRF_ARGS,  0,               strptr:(char **)&oxgrf_args,        defstrval:"",          TYPE_STRING,   0},    \
     {"single-thread-disable",    CONFIG_HLP_NOSNGLT,     PARAMFLAG_BOOL,  iptr:&single_thread_flag,           defintval:1,           TYPE_INT,    0}, \
     {"dlsch-parallel",           CONFIG_HLP_DLSCH_PARA,  0,               u8ptr:&nrUE_params.nr_dlsch_parallel,       defintval:0,           TYPE_UINT8,  0}, \
     {"offset-divisor",           CONFIG_HLP_OFFSET_DIV,  0,               uptr:&nrUE_params.ofdm_offset_divisor,    defuintval:8,           TYPE_UINT32,  0}, \
