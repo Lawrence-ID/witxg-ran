@@ -78,7 +78,184 @@ char nr_dci_format_string[8][30] = {
 
 
 //static const int16_t conjugate[8]__attribute__((aligned(32))) = {-1,1,-1,1,-1,1,-1,1};
+int TempFlag = 0;
 
+void nr_pdcch_demapping_deinterleaving(uint32_t *llr,
+                                       uint32_t *z,
+                                       uint8_t coreset_time_dur,
+                                       uint8_t startsym,
+                                       uint32_t coreset_nbr_rb,
+                                       uint8_t reg_bundle_size_L,
+                                       uint8_t coreset_interleaver_size_R,
+                                       uint16_t n_shift,
+                                       uint8_t number_of_candidates,
+                                       uint16_t *CCE,
+                                       uint8_t *L) 
+                                       {
+  /*
+   * This function will do demapping and deinterleaving from llr containing demodulated symbols
+   * Demapping will regroup in REG and bundles
+   * Deinterleaving will order the bundles
+   *
+   * In the following example we can see the process. The llr contains the demodulated IQs, but they are not ordered from REG 0,1,2,..
+   * In e_rx (z) we will order the REG ids and group them into bundles.
+   * Then we will put the bundles in the correct order as indicated in subclause 7.3.2.2
+   *
+   llr --------------------------> e_rx (z) ----> e_rx (z)
+   |   ...
+   |   ...
+   |   REG 26
+   symbol 2    |   ...
+   |   ...
+   |   REG 5
+   |   REG 2
+
+   |   ...
+   |   ...
+   |   REG 25
+   symbol 1    |   ...
+   |   ...
+   |   REG 4
+   |   REG 1
+
+   |   ...
+   |   ...                           ...              ...
+   |   REG 24 (bundle 7)             ...              ...
+   symbol 0    |   ...                           bundle 3         bundle 6
+   |   ...                           bundle 2         bundle 1
+   |   REG 3                         bundle 1         bundle 7
+   |   REG 0  (bundle 0)             bundle 0         bundle 0
+
+  */
+  int c = 0, r = 0;
+  uint16_t bundle_j = 0, f_bundle_j = 0, f_reg = 0;
+  uint32_t coreset_C = 0;
+  uint16_t index_z, index_llr;
+  int coreset_interleaved = 0;
+
+  if (reg_bundle_size_L != 0) { // interleaving will be done only if reg_bundle_size_L != 0
+    coreset_interleaved = 1;
+    coreset_C = (uint32_t) ((coreset_nbr_rb * coreset_time_dur) / (coreset_interleaver_size_R * reg_bundle_size_L));
+  } else {
+    reg_bundle_size_L = 6;
+  }
+
+  int coreset_cce_num = (coreset_nbr_rb * coreset_time_dur)/6;
+  int coreset_interleaved_num = coreset_cce_num*6/reg_bundle_size_L;
+  int f_bundle_j_list[coreset_interleaved_num];
+  memset(f_bundle_j_list, 0, coreset_interleaved_num*sizeof(int));
+
+  for (int reg = 0; reg < ((coreset_nbr_rb * coreset_time_dur)); reg++) {
+    if ((reg % reg_bundle_size_L) == 0) {
+      if (r == coreset_interleaver_size_R) {
+        r = 0;
+        c++;
+      }
+
+      bundle_j = (c * coreset_interleaver_size_R) + r;
+      f_bundle_j = ((r * coreset_C) + c + n_shift) % ((coreset_nbr_rb * coreset_time_dur) / reg_bundle_size_L);
+
+      if (coreset_interleaved == 0) f_bundle_j = bundle_j;
+
+      f_bundle_j_list[reg / reg_bundle_size_L] = f_bundle_j;
+      LOG_I(PHY, "reg %d, reg_bundle_size_L %d, coreset_interleaver_size_R %d, coreset_interleaved %d, bundle_j %d, f_bundle_j %d ,  %d, c %d, r %d\n",
+            reg, reg_bundle_size_L, coreset_interleaver_size_R, coreset_interleaved, bundle_j, f_bundle_j, reg / reg_bundle_size_L, c, r);
+    }
+    if ((reg % reg_bundle_size_L) == 0) r++;
+  }
+
+  for (int i=0; i<coreset_interleaved_num; i++)
+  {
+    //LOG_D(PHY, "demapping_deinterleaving:f_bundle_j_list[%d]=%d\n", i, f_bundle_j_list[i]);
+  }
+
+
+  // Get cce_list indices by reg_idx in ascending order
+  int f_bundle_j_list_id = 0;
+  int f_bundle_j_list_ord[coreset_interleaved_num];
+  memset(f_bundle_j_list_ord, 0, coreset_interleaved_num*sizeof(int));
+  
+  for (int c_id = 0; c_id < number_of_candidates; c_id++ ) {
+    f_bundle_j_list_id = CCE[c_id]*6/reg_bundle_size_L;
+      for (int p = 0; p < coreset_interleaved_num; p++) {
+        for (int p2 = CCE[c_id]*6/reg_bundle_size_L; p2 < (CCE[c_id] + L[c_id])*6/reg_bundle_size_L; p2++) {
+            if (f_bundle_j_list[p2] == p) {
+                f_bundle_j_list_ord[f_bundle_j_list_id] = p;
+                f_bundle_j_list_id++;
+
+                LOG_I(PHY, "c_id %d, f_bundle_j_list_id %d, p %d, p2 %d, f_bundle_j_list[p2] %d, f_bundle_j_list_ord[f_bundle_j_list_id] %d, coreset_interleaved_num %d\n",
+                    c_id, f_bundle_j_list_id, p, p2, f_bundle_j_list[p2], f_bundle_j_list_ord[f_bundle_j_list_id-1], coreset_interleaved_num);
+                break;
+        }
+      }  
+    }
+  }
+	if(TempFlag)
+	{
+		for (int i = 0; i < coreset_interleaved_num; i++)
+		  {
+		    LOG_I(PHY, "demapping_deinterleaving:L %d,f_bundle_j_list[%d]=%d, f_bundle_j_list_ord[%d]=%d, CCe %d\n", L[0], i, f_bundle_j_list[i], i, f_bundle_j_list_ord[i], CCE[0]);
+		  }
+	}
+#if 1
+
+  int rb = 0;
+  for (int symbol_idx =startsym; symbol_idx < coreset_time_dur+startsym; symbol_idx++) {
+    for (int cce_count = CCE[0]*6/reg_bundle_size_L; cce_count < (CCE[0]+L[0])*6/reg_bundle_size_L; cce_count++) {
+      for (int reg_in_cce_idx = 0; reg_in_cce_idx < reg_bundle_size_L/coreset_time_dur; reg_in_cce_idx++) {
+
+        f_reg = (f_bundle_j_list_ord[cce_count] * reg_bundle_size_L/coreset_time_dur) + reg_in_cce_idx;
+        index_z = 9 * rb;
+        index_llr = (uint16_t) (f_reg + symbol_idx * coreset_nbr_rb) * 9;
+
+        LOG_I(PHY, "symbol_idx %d, cce_count %d, reg_in_cce_idx %d, cce %d, L %d,f_reg %d, f_bundle_j_list_ord[cce_count] %d index_z %d (%d ), index_llr %d (%d )\n", 
+                    symbol_idx, cce_count, reg_in_cce_idx, CCE[0], L[0],f_reg, f_bundle_j_list_ord[cce_count],  index_z, index_z/9,  index_llr, index_llr/9);
+        for (int i = 0; i < 9; i++) {
+          z[index_z + i] = llr[index_llr + i];
+if (TempFlag)
+          LOG_I(PHY,"[Ccestart=%d, L=%d, cce_count=%d,reg_in_cce_idx=%d,symbol_idx=%d] z[%d]=(%d,%d) <-> \t[f_reg=%d,f_bundle_j_list_ord=%d] llr[%d]=(%d,%d) \n",
+                CCE[0], L[0], cce_count,reg_in_cce_idx,symbol_idx,(index_z + i),*(int16_t *) &z[index_z + i],*(1 + (int16_t *) &z[index_z + i]),
+                 f_reg,f_bundle_j_list_ord[cce_count],(index_llr + i),*(int16_t *) &llr[index_llr + i], *(1 + (int16_t *) &llr[index_llr + i]));
+        }
+        rb++;
+      }
+    }
+  }
+
+
+
+  
+#else
+  int rb = 0;
+      for (int cce_count = CCE[0]; cce_count < CCE[0] + L[0]; cce_count++)
+      {
+          for (int reg_in_cce_idx = 0; reg_in_cce_idx < NR_NB_REG_PER_CCE/coreset_time_dur; reg_in_cce_idx++)
+          {
+              for (int symbol_idx = 0; symbol_idx < coreset_time_dur; symbol_idx++)
+              {
+                f_reg = (f_bundle_j_list_ord[cce_count] * reg_bundle_size_L/coreset_time_dur) + reg_in_cce_idx; /* 对符号均分处理 */
+                index_z = 9 * rb;
+                index_llr = (uint16_t) (f_reg + symbol_idx * coreset_nbr_rb) * 9;
+
+                for (int i = 0; i < 9; i++)
+                {
+                  z[index_z + i] = llr[index_llr + i];
+#if 0
+                  LOG_I(PHY,"[cce_count=%d,reg_in_cce_idx=%d,f_bundle_j_list_ord=%d,symbol_idx=%d] z[%d]=(%d,%d) <-> \t[f_reg=%d,fbundle_j=%d] llr[%d]=(%d,%d) \n",
+                        cce_count,reg_in_cce_idx,f_bundle_j_list_ord[cce_count],symbol_idx,(index_z + i),*(int16_t *) &z[index_z + i],*(1 + (int16_t *) &z[index_z + i]),
+                         f_reg,f_bundle_j,(index_llr + i),*(int16_t *) &llr[index_llr + i], *(1 + (int16_t *) &llr[index_llr + i]));
+#endif
+                }
+                rb++;
+              }
+        }
+      }
+#endif
+      return;
+
+}
+
+#if 0
 
 static void nr_pdcch_demapping_deinterleaving(uint32_t *llr,
                                        uint32_t *e_rx,
@@ -202,6 +379,7 @@ static void nr_pdcch_demapping_deinterleaving(uint32_t *llr,
     }
   }
 }
+#endif
 
 int32_t nr_pdcch_llr(NR_DL_FRAME_PARMS *frame_parms, int32_t rx_size, int32_t rxdataF_comp[][rx_size],
                      int16_t *pdcch_llr, uint8_t symbol,uint32_t coreset_nbr_rb) {
@@ -669,7 +847,7 @@ int32_t nr_rx_pdcch(PHY_VARS_NR_UE *ue,
                     UE_nr_rxtx_proc_t *proc,
                     int32_t pdcch_est_size,
                     int32_t pdcch_dl_ch_estimates[][pdcch_est_size],
-                    int16_t *pdcch_e_rx,
+                    int16_t *llr,
                     fapi_nr_dl_config_dci_dl_pdu_rel15_t *rel15) {
 
   uint32_t frame = proc->frame_rx;
@@ -689,8 +867,6 @@ int32_t nr_rx_pdcch(PHY_VARS_NR_UE *ue,
   __attribute__ ((aligned(32))) int32_t pdcch_dl_ch_estimates_ext[4*frame_parms->nb_antennas_rx][rx_size];
 
   // Pointer to llrs, 4-bit resolution.
-  int32_t llr_size = 2*4*100*12;
-  int16_t llr[llr_size];
 
   get_coreset_rballoc(rel15->coreset.frequency_domain_resource,&n_rb,&rb_offset);
   LOG_D(PHY,"pdcch coreset: freq %x, n_rb %d, rb_offset %d\n",
@@ -761,7 +937,7 @@ int32_t nr_rx_pdcch(PHY_VARS_NR_UE *ue,
                  s,
                  n_rb);
 
-    UEscopeCopy(ue, pdcchLlr, llr, sizeof(int16_t), 1, llr_size);
+    UEscopeCopy(ue, pdcchLlr, llr, sizeof(int16_t), 1, pdcch_est_size);
 
 #if T_TRACER
     
@@ -776,6 +952,7 @@ int32_t nr_rx_pdcch(PHY_VARS_NR_UE *ue,
   }
 
   LOG_D(PHY,"we enter nr_pdcch_demapping_deinterleaving(), number of candidates %d\n",rel15->number_of_candidates);
+#if 0
   nr_pdcch_demapping_deinterleaving((uint32_t *) llr,
                                     (uint32_t *) pdcch_e_rx,
                                     rel15->coreset.duration,
@@ -787,7 +964,7 @@ int32_t nr_rx_pdcch(PHY_VARS_NR_UE *ue,
                                     rel15->number_of_candidates,
                                     rel15->CCE,
                                     rel15->L);
-
+#endif
   LOG_D(PHY,"we end nr_pdcch_demapping_deinterleaving()\n");
   LOG_D(PHY,"Ending nr_rx_pdcch() function\n");
 
@@ -860,7 +1037,7 @@ static uint16_t nr_dci_false_detection(uint64_t *dci,
 
 uint8_t nr_dci_decoding_procedure(PHY_VARS_NR_UE *ue,
                                   UE_nr_rxtx_proc_t *proc,
-                                  int16_t *pdcch_e_rx,
+                                  int16_t *pdcch_llr,
                                   fapi_nr_dci_indication_t *dci_ind,
                                   fapi_nr_dl_config_dci_dl_pdu_rel15_t *rel15,
                                   NR_UE_PDCCH_CONFIG *phy_pdcch_config) {
@@ -869,12 +1046,36 @@ uint8_t nr_dci_decoding_procedure(PHY_VARS_NR_UE *ue,
   int16_t tmp_e[16*108];
   rnti_t n_rnti;
   int e_rx_cand_idx = 0;
-
+  int32_t pdcch_e_rx_size = 2*4*100*12;
+  fapi_nr_coreset_t *coreset = NULL;
+  int16_t pdcch_e_rx[pdcch_e_rx_size];
+  coreset = &rel15->coreset;
+  
   for (int j=0;j<rel15->number_of_candidates;j++) {
     int CCEind = rel15->CCE[j];
     int L = rel15->L[j];
 
     // Loop over possible DCI lengths
+    {
+          LOG_I(PHY," %d %d, nr_pdcch_demapping_deinterleaving: SsIndex %d, CCEind %d L %d num_dci_options %d, rnti %d, pdcch-dmrs-scramblingid %d, scrambling_rnti %d\n", \
+                    proc->frame_rx, proc->nr_slot_rx, 0, CCEind, L, rel15->num_dci_options, rel15->rnti, coreset->pdcch_dmrs_scrambling_id, coreset->scrambling_rnti);
+          LOG_I(PHY, "%d %d, candidates %d, rb_num %d, rb_start %d, duration %d, StartSymbolIndex %d, BWPSize %d, RegBundleSize %d, %d, %d cce %d L %d\n", \
+                    proc->frame_rx, proc->nr_slot_rx, rel15->number_of_candidates, rel15->BWPSize, rel15->BWPStart, coreset->duration, 
+                    coreset->StartSymbolIndex, rel15->BWPSize, coreset->RegBundleSize, coreset->InterleaverSize,
+                                        coreset->ShiftIndex, rel15->CCE[j], rel15->L[j]);
+    }
+    nr_pdcch_demapping_deinterleaving((uint32_t *) pdcch_llr,
+                                        (uint32_t *) pdcch_e_rx,
+                                        coreset->duration,
+                                        coreset->StartSymbolIndex,
+                                        rel15->BWPSize,
+                                        coreset->RegBundleSize,
+                                        coreset->InterleaverSize,
+                                        coreset->ShiftIndex,
+                                        1,
+                                        &rel15->CCE[j],
+                                        &rel15->L[j]);
+
     
     for (int k = 0; k < rel15->num_dci_options; k++) {
       // skip this candidate if we've already found one with the

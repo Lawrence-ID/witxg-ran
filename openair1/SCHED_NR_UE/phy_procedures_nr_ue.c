@@ -508,11 +508,13 @@ int nr_ue_pdcch_procedures(uint8_t gNB_id,
   start_meas(&ue->dlsch_rx_pdcch_stats);
 
   /// PDCCH/DCI e-sequence (input to rate matching).
-  int32_t pdcch_e_rx_size = NR_MAX_PDCCH_SIZE;
-  int16_t pdcch_e_rx[pdcch_e_rx_size];
+  //int32_t pdcch_e_rx_size = NR_MAX_PDCCH_SIZE;
+  int32_t pdcch_e_rx_size = 2*4*100*12;
+
+  int16_t pdcch_llr[pdcch_e_rx_size];
 
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_RX_PDCCH, VCD_FUNCTION_IN);
-  nr_rx_pdcch(ue, proc, pdcch_est_size, pdcch_dl_ch_estimates, pdcch_e_rx, rel15);
+  nr_rx_pdcch(ue, proc, pdcch_e_rx_size, pdcch_dl_ch_estimates, pdcch_llr, rel15);
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_RX_PDCCH, VCD_FUNCTION_OUT);
   
 
@@ -523,7 +525,7 @@ int nr_ue_pdcch_procedures(uint8_t gNB_id,
 	 n_ss);
 #endif
 
-  dci_cnt = nr_dci_decoding_procedure(ue, proc, pdcch_e_rx, dci_ind, rel15, phy_pdcch_config);
+  dci_cnt = nr_dci_decoding_procedure(ue, proc, pdcch_llr, dci_ind, rel15, phy_pdcch_config);
 
 #ifdef NR_PDCCH_SCHED_DEBUG
   LOG_I(PHY,"<-NR_PDCCH_PHY_PROCEDURES_LTE_UE (nr_ue_pdcch_procedures)-> Ending function nr_dci_decoding_procedure() -> dci_cnt=%u\n",dci_cnt);

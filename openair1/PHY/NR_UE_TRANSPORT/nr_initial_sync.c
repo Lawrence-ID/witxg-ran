@@ -241,6 +241,40 @@ int nr_initial_sync(UE_nr_rxtx_proc_t *proc,
   if (1){ // (cnt>100)
    cnt =0;
 
+static int cap_data = 0;
+   if (cap_data == 0)
+   {
+       FILE  *output_fd = NULL;
+
+       #if 0
+       output_fd=fopen("rxdata_2frames_3450_728_slot11.am","w");
+          if (output_fd==NULL){
+          printf("Error opening \n");}
+
+        if (output_fd){
+           fwrite(&ue->common_vars.rxdata[0][0],sizeof(int32_t),fp->samples_per_frame*2,output_fd);
+   
+          fclose(output_fd);
+           }
+      
+      LOG_I(PHY, "store 2frames data\n"); 
+      #else
+       //output_fd=fopen("rxdata_2frames_3450_728.am","r");
+       output_fd=fopen("rxdata_2frames_3450_728_slot12.am","r");
+          if (output_fd==NULL){
+          printf("Error opening \n");}
+
+        if (output_fd){
+           fread(&ue->common_vars.rxdata[0][0],sizeof(int32_t),fp->samples_per_frame*2,output_fd);
+   
+          fclose(output_fd);
+           }
+      
+      LOG_I(PHY, "read 2frames data\n"); 
+      #endif   
+      cap_data++;
+   }
+
    // initial sync performed on two successive frames, if pbch passes on first frame, no need to process second frame 
    // only one frame is used for symulation tools
    for(is=0; is<n_frames;is++) {
@@ -550,7 +584,7 @@ int nr_initial_sync(UE_nr_rxtx_proc_t *proc,
     int32_t pdcch_est_size = ((((fp->symbols_per_slot*(fp->ofdm_symbol_size+LTE_CE_FILTER_LENGTH))+15)/16)*16);
     __attribute__ ((aligned(16))) int32_t pdcch_dl_ch_estimates[4*fp->nb_antennas_rx][pdcch_est_size];
 
-
+    proc->nr_slot_rx = phy_pdcch_config.slot;
     for(int n_ss = 0; n_ss<phy_pdcch_config.nb_search_space; n_ss++) {
       uint8_t nb_symb_pdcch = phy_pdcch_config.pdcch_config[n_ss].coreset.duration;
       int start_symb = phy_pdcch_config.pdcch_config[n_ss].coreset.StartSymbolIndex;
