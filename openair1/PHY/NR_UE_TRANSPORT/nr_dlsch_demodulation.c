@@ -543,6 +543,13 @@ int nr_rx_pdsch(PHY_VARS_NR_UE *ue,
 
     }
 
+   if ((pilots == 0) && (type == SI_PDSCH))
+   {
+     uint pdsch_amp;
+     pdsch_amp = cal_amp((int16_t *)&pdsch_vars[gNB_id]->rxdataF_ext[0][symbol *nb_rb_pdsch * 12 ], nb_rb_pdsch * 12);
+     LOG_I(PHY, "frame %d %d, SIB symbol %d pdsch_amp %d, rb %d\n", frame, nr_slot_rx, symbol, pdsch_amp, nb_rb_pdsch);
+   }
+   
     stop_meas(&ue->generic_stat_bis[proc->thread_id][slot]);
     if (cpumeas(CPUMEAS_GETSTATE))
       LOG_D(PHY, "[AbsSFN %u.%d] Slot%d Symbol %d: LLR Computation  %5.2f \n",frame,nr_slot_rx,slot,symbol,ue->generic_stat_bis[proc->thread_id][slot].p_time/(cpuf*1000.0));
