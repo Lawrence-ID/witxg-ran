@@ -247,7 +247,7 @@ static int cap_data = 0;
        FILE  *output_fd = NULL;
 
        #if 0
-       output_fd=fopen("rxdata_2frames_3450_728_slot11.am","w");
+       output_fd=fopen("rxdata_2frames_36192_0_slot0.am","w");
           if (output_fd==NULL){
           printf("Error opening \n");}
 
@@ -260,7 +260,7 @@ static int cap_data = 0;
       LOG_I(PHY, "store 2frames data\n"); 
       #else
        //output_fd=fopen("rxdata_2frames_3450_728.am","r");
-       output_fd=fopen("rxdata_2frames_3450_728_slot12.am","r");
+       output_fd=fopen("rxdata_2frames_36192_0_slot0.am","r");
           if (output_fd==NULL){
           printf("Error opening \n");}
 
