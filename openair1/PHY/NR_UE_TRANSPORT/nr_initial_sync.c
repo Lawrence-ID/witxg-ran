@@ -242,7 +242,7 @@ int nr_initial_sync(UE_nr_rxtx_proc_t *proc,
    cnt =0;
 
 static int cap_data = 0;
-   if (cap_data == 0)
+   if (cap_data == 10)
    {
        FILE  *output_fd = NULL;
 
