@@ -158,7 +158,7 @@ void nr_pdcch_demapping_deinterleaving(uint32_t *llr,
       if (coreset_interleaved == 0) f_bundle_j = bundle_j;
 
       f_bundle_j_list[reg / reg_bundle_size_L] = f_bundle_j;
-      LOG_I(PHY, "reg %d, reg_bundle_size_L %d, coreset_interleaver_size_R %d, coreset_interleaved %d, bundle_j %d, f_bundle_j %d ,  %d, c %d, r %d\n",
+      LOG_D(PHY, "reg %d, reg_bundle_size_L %d, coreset_interleaver_size_R %d, coreset_interleaved %d, bundle_j %d, f_bundle_j %d ,  %d, c %d, r %d\n",
             reg, reg_bundle_size_L, coreset_interleaver_size_R, coreset_interleaved, bundle_j, f_bundle_j, reg / reg_bundle_size_L, c, r);
     }
     if ((reg % reg_bundle_size_L) == 0) r++;
@@ -183,7 +183,7 @@ void nr_pdcch_demapping_deinterleaving(uint32_t *llr,
                 f_bundle_j_list_ord[f_bundle_j_list_id] = p;
                 f_bundle_j_list_id++;
 
-                LOG_I(PHY, "c_id %d, f_bundle_j_list_id %d, p %d, p2 %d, f_bundle_j_list[p2] %d, f_bundle_j_list_ord[f_bundle_j_list_id] %d, coreset_interleaved_num %d\n",
+                LOG_D(PHY, "c_id %d, f_bundle_j_list_id %d, p %d, p2 %d, f_bundle_j_list[p2] %d, f_bundle_j_list_ord[f_bundle_j_list_id] %d, coreset_interleaved_num %d\n",
                     c_id, f_bundle_j_list_id, p, p2, f_bundle_j_list[p2], f_bundle_j_list_ord[f_bundle_j_list_id-1], coreset_interleaved_num);
                 break;
         }
@@ -208,7 +208,7 @@ void nr_pdcch_demapping_deinterleaving(uint32_t *llr,
         index_z = 9 * rb;
         index_llr = (uint16_t) (f_reg + symbol_idx * coreset_nbr_rb) * 9;
 
-        LOG_I(PHY, "symbol_idx %d, cce_count %d, reg_in_cce_idx %d, cce %d, L %d,f_reg %d, f_bundle_j_list_ord[cce_count] %d index_z %d (%d ), index_llr %d (%d )\n", 
+        LOG_D(PHY, "symbol_idx %d, cce_count %d, reg_in_cce_idx %d, cce %d, L %d,f_reg %d, f_bundle_j_list_ord[cce_count] %d index_z %d (%d ), index_llr %d (%d )\n", 
                     symbol_idx, cce_count, reg_in_cce_idx, CCE[0], L[0],f_reg, f_bundle_j_list_ord[cce_count],  index_z, index_z/9,  index_llr, index_llr/9);
         for (int i = 0; i < 9; i++) {
           z[index_z + i] = llr[index_llr + i];
@@ -1057,9 +1057,9 @@ uint8_t nr_dci_decoding_procedure(PHY_VARS_NR_UE *ue,
 
     // Loop over possible DCI lengths
     {
-          LOG_I(PHY," %d %d, nr_pdcch_demapping_deinterleaving: SsIndex %d, CCEind %d L %d num_dci_options %d, rnti %d, pdcch-dmrs-scramblingid %d, scrambling_rnti %d\n", \
+          LOG_D(PHY," %d %d, nr_pdcch_demapping_deinterleaving: SsIndex %d, CCEind %d L %d num_dci_options %d, rnti %d, pdcch-dmrs-scramblingid %d, scrambling_rnti %d\n", \
                     proc->frame_rx, proc->nr_slot_rx, 0, CCEind, L, rel15->num_dci_options, rel15->rnti, coreset->pdcch_dmrs_scrambling_id, coreset->scrambling_rnti);
-          LOG_I(PHY, "%d %d, candidates %d, rb_num %d, rb_start %d, duration %d, StartSymbolIndex %d, BWPSize %d, RegBundleSize %d, %d, %d cce %d L %d\n", \
+          LOG_D(PHY, "%d %d, candidates %d, rb_num %d, rb_start %d, duration %d, StartSymbolIndex %d, BWPSize %d, RegBundleSize %d, %d, %d cce %d L %d\n", \
                     proc->frame_rx, proc->nr_slot_rx, rel15->number_of_candidates, rel15->BWPSize, rel15->BWPStart, coreset->duration, 
                     coreset->StartSymbolIndex, rel15->BWPSize, coreset->RegBundleSize, coreset->InterleaverSize,
                                         coreset->ShiftIndex, rel15->CCE[j], rel15->L[j]);
