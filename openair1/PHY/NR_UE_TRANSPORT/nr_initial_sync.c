@@ -584,7 +584,12 @@ static int cap_data = 0;
     int32_t pdcch_est_size = ((((fp->symbols_per_slot*(fp->ofdm_symbol_size+LTE_CE_FILTER_LENGTH))+15)/16)*16);
     __attribute__ ((aligned(16))) int32_t pdcch_dl_ch_estimates[4*fp->nb_antennas_rx][pdcch_est_size];
 
-    proc->nr_slot_rx = phy_pdcch_config.slot;
+    int nb_search_space = phy_pdcch_config.nb_search_space;
+    for (int slot_id = 0; slot_id < 2; slot_id++)
+    {
+      phy_pdcch_config.nb_search_space = nb_search_space;
+      proc->nr_slot_rx = phy_pdcch_config.slot + slot_id;
+      LOG_I(PHY, "pdcch_slot %d, nb_search_space %d\n", proc->nr_slot_rx, phy_pdcch_config.nb_search_space);
     for(int n_ss = 0; n_ss<phy_pdcch_config.nb_search_space; n_ss++) {
       uint8_t nb_symb_pdcch = phy_pdcch_config.pdcch_config[n_ss].coreset.duration;
       int start_symb = phy_pdcch_config.pdcch_config[n_ss].coreset.StartSymbolIndex;
@@ -593,14 +598,14 @@ static int cap_data = 0;
         nr_slot_fep_init_sync(ue,
                               proc,
                               l, // the UE PHY has no notion of the symbols to be monitored in the search space
-                              phy_pdcch_config.slot,
+                              phy_pdcch_config.slot + slot_id,
                               is*fp->samples_per_frame+phy_pdcch_config.sfn*fp->samples_per_frame+ue->rx_offset);
 
         if (coreset_nb_rb > 0)
           nr_pdcch_channel_estimation(ue,
                                       proc,
                                       0,
-                                      phy_pdcch_config.slot,
+                                      phy_pdcch_config.slot + slot_id,
                                       l,
                                       fp->Nid_cell,
                                       fp->first_carrier_offset+(phy_pdcch_config.pdcch_config[n_ss].BWPStart + coreset_start_rb)*12,
@@ -622,7 +627,7 @@ static int cap_data = 0;
             nr_slot_fep_init_sync(ue,
                                   proc,
                                   m,
-                                  phy_pdcch_config.slot,  // same slot and offset as pdcch
+                                  phy_pdcch_config.slot + slot_id,  // same slot and offset as pdcch
                                   is*fp->samples_per_frame+phy_pdcch_config.sfn*fp->samples_per_frame+ue->rx_offset);
           }
 
@@ -646,6 +651,9 @@ static int cap_data = 0;
         }
       }
     }
+    if(dec == true)
+       break;
+  }
     if (dec == false) // sib1 not decoded
       ret = -1;
 
