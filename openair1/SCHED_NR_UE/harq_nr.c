@@ -354,7 +354,7 @@ void downlink_harq_process(NR_DL_UE_HARQ_t *dl_harq, int harq_pid, int ndi, int 
         LOG_D(PHY,"Starting retransmission on a harq pid (%d), rv (%d)\n", harq_pid, rv);
     }
 
-    if (ndi!=dl_harq->DCINdi) {
+    if ((dl_harq->status == SCH_IDLE) || (ndi!=dl_harq->DCINdi)) {
       dl_harq->first_rx = true;
       dl_harq->DLround = 0;
     } else {
