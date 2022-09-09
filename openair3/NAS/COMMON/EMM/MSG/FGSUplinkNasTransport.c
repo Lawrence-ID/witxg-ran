@@ -68,6 +68,9 @@ int encode_nssai(OctetString *nssai, uint8_t iei, uint8_t *buffer)
   uint32_t encoded = 0;
   int encode_result;
 
+  if (nssai->length == 0)
+    return 0;
+    
   if (iei > 0) {
     *buffer = iei;
     encoded++;

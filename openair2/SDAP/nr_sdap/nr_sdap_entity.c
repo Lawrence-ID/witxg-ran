@@ -217,6 +217,9 @@ static void nr_sdap_rx_entity(nr_sdap_entity_t *entity,
      * 5.2.2 Downlink
      * if the DRB from which this SDAP data PDU is received is configured by RRC with the presence of SDAP header.
      */
+    //TODO 
+    //Disable DL SDAP HEADER
+    has_sdap = 0;
     if(has_sdap && has_sdapHeader) { // Handling the SDAP Header
       offset = SDAP_HDR_LENGTH;
       /*

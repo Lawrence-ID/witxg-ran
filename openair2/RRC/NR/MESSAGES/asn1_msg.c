@@ -2626,6 +2626,9 @@ do_NR_DLInformationTransfer(
                 "DLInformationTransfer", encoded);
     LOG_D(NR_RRC,"DLInformationTransfer Encoded %zd bytes\n", encoded);
     //for (int i=0;i<encoded;i++) printf("%02x ",(*buffer)[i]);
+    if ( LOG_DEBUGFLAG(DEBUG_ASN1) ) {
+      xer_fprint(stdout, &asn_DEF_NR_DL_DCCH_Message, (void *)&dl_dcch_msg);
+    }
     return encoded;
 }
 
@@ -2648,7 +2651,10 @@ uint8_t do_NR_ULInformationTransfer(uint8_t **buffer, uint32_t pdu_length, uint8
     AssertFatal(encoded > 0,"ASN1 message encoding failed (%s, %ld)!\n",
                 "ULInformationTransfer",encoded);
     LOG_D(NR_RRC,"ULInformationTransfer Encoded %zd bytes\n",encoded);
-
+    
+    if ( LOG_DEBUGFLAG(DEBUG_ASN1) ) {
+      xer_fprint(stdout, &asn_DEF_NR_UL_DCCH_Message, (void *)&ul_dcch_msg);
+    }
     return encoded;
 }
 

@@ -80,7 +80,7 @@ int nas_stream_encrypt_eia2(nas_stream_cipher_t *stream_cipher, uint8_t out[4])
 
   memcpy(&m[8], stream_cipher->message, m_length);
 
-#if defined(SECU_DEBUG)
+#if defined(SECU_DEBUG111)
   {
     int i;
     printf("Byte length: %u, Zero bits: %u\nm: ", m_length + 8, zero_bit);
@@ -109,7 +109,7 @@ int nas_stream_encrypt_eia2(nas_stream_cipher_t *stream_cipher, uint8_t out[4])
   CMAC_Final(cmac_ctx, data, &size);
   CMAC_CTX_free(cmac_ctx);
 
-#if defined(SECU_DEBUG)
+#if defined(SECU_DEBUG1111)
   {
     int i;
     printf("out: ");

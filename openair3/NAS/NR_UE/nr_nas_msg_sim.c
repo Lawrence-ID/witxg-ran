@@ -51,6 +51,7 @@ extern char *baseNetAddress;
 extern uint16_t NB_UE_INST;
 static ue_sa_security_key_t ** ue_security_key;
 
+uint32_t  sec_seq_number = 0;
 static int nas_protected_security_header_encode(
   char                                       *buffer,
   const fgs_nas_message_security_header_t    *header,
@@ -283,10 +284,10 @@ void derive_kgnb(uint8_t kamf[32], uint32_t count, uint8_t *kgnb){
   kdf(kamf, 32, input, 10, out, 32);
   for (int i = 0; i < 32; i++)
     kgnb[i] = out[i];
-  printf("kgnb : ");
-  for(int pp=0;pp<32;pp++)
-   printf("%02x ",kgnb[pp]);
-  printf("\n");
+  // printf("kgnb : ");
+  // for(int pp=0;pp<32;pp++)
+  //  printf("%02x ",kgnb[pp]);
+  // printf("\n");
 }
 
 void derive_ue_keys(int Mod_id, uint8_t *buf, uicc_t *uicc) {
@@ -330,30 +331,30 @@ void derive_ue_keys(int Mod_id, uint8_t *buf, uicc_t *uicc) {
   derive_knas(0x02, 2, kamf, knas_int);
   derive_kgnb(kamf,0,kgnb);
 
-  printf("kausf:");
-  for(int i = 0; i < 32; i++){
-    printf("%x ", kausf[i]);
-  }
-  printf("\n");
+  // printf("kausf:");
+  // for(int i = 0; i < 32; i++){
+  //   printf("%x ", kausf[i]);
+  // }
+  // printf("\n");
 
-  printf("kseaf:");
-  for(int i = 0; i < 32; i++){
-    printf("%x ", kseaf[i]);
-  }
+  // printf("kseaf:");
+  // for(int i = 0; i < 32; i++){
+  //   printf("%x ", kseaf[i]);
+  // }
 
-  printf("\n");
+  // printf("\n");
 
-  printf("kamf:");
-  for(int i = 0; i < 32; i++){
-    printf("%x ", kamf[i]);
-  }
-  printf("\n");
+  // printf("kamf:");
+  // for(int i = 0; i < 32; i++){
+  //   printf("%x ", kamf[i]);
+  // }
+  // printf("\n");
 
-  printf("knas_int:\n");
-  for(int i = 0; i < 16; i++){
-    printf("%x ", knas_int[i]);
-  }
-  printf("\n");
+  // printf("knas_int:\n");
+  // for(int i = 0; i < 16; i++){
+  //   printf("%x ", knas_int[i]);
+  // }
+  // printf("\n");
 }
 
 void generateRegistrationRequest(as_nas_info_t *initialNasMsg, int Mod_id) {
@@ -590,7 +591,7 @@ static void generateSecurityModeComplete(int Mod_id,as_nas_info_t *initialNasMsg
 
 static void generateRegistrationComplete(int Mod_id, as_nas_info_t *initialNasMsg, SORTransparentContainer               *sortransparentcontainer) {
   //wait send RRCReconfigurationComplete and InitialContextSetupResponse
-  sleep(1);
+//  sleep(1);
   int length = 0;
   int size = 0;
   fgs_nas_message_t nas_msg;
@@ -604,7 +605,7 @@ static void generateRegistrationComplete(int Mod_id, as_nas_info_t *initialNasMs
   sp_msg->header.protocol_discriminator = FGS_MOBILITY_MANAGEMENT_MESSAGE;
   sp_msg->header.security_header_type   = INTEGRITY_PROTECTED_AND_CIPHERED;
   sp_msg->header.message_authentication_code = 0;
-  sp_msg->header.sequence_number        = 1;
+  sp_msg->header.sequence_number        = ++sec_seq_number;
   length = 7;
   sp_msg->plain.mm_msg.registration_complete.protocoldiscriminator = FGS_MOBILITY_MANAGEMENT_MESSAGE;
   length += 1;
@@ -650,7 +651,7 @@ static void generateRegistrationComplete(int Mod_id, as_nas_info_t *initialNasMs
   initialNasMsg->length = length;
   stream_cipher.key        = ue_security_key[Mod_id]->knas_int;
   stream_cipher.key_length = 16;
-  stream_cipher.count      = 1;
+  stream_cipher.count      = sec_seq_number;
   stream_cipher.bearer     = 1;
   stream_cipher.direction  = 0;
   stream_cipher.message    = (unsigned char *)(initialNasMsg->data + 6);
@@ -662,7 +663,7 @@ static void generateRegistrationComplete(int Mod_id, as_nas_info_t *initialNasMs
     &stream_cipher,
     mac);
 
-  printf("mac %x %x %x %x \n", mac[0], mac[1], mac[2], mac[3]);
+  LOG_I(NAS, "mac %x %x %x %x \n", mac[0], mac[1], mac[2], mac[3]);
   for(int i = 0; i < 4; i++){
      initialNasMsg->data[2+i] = mac[i];
   }
@@ -683,7 +684,7 @@ void decodeDownlinkNASTransport(as_nas_info_t *initialNasMsg, uint8_t * pdu_buff
 
 static void generatePduSessionEstablishRequest(int Mod_id, uicc_t * uicc, as_nas_info_t *initialNasMsg){
   //wait send RegistrationComplete
-  usleep(100*150);
+//  usleep(100*150);
   int size = 0;
   fgs_nas_message_t nas_msg={0};
 
@@ -705,7 +706,8 @@ static void generatePduSessionEstablishRequest(int Mod_id, uicc_t * uicc, as_nas
   nas_stream_cipher_t stream_cipher;
   uint8_t             mac[4];
   nas_msg.header.protocol_discriminator = FGS_MOBILITY_MANAGEMENT_MESSAGE;
-  nas_msg.header.security_header_type = INTEGRITY_PROTECTED_AND_CIPHERED_WITH_NEW_SECU_CTX;
+  nas_msg.header.security_header_type = INTEGRITY_PROTECTED_AND_CIPHERED;
+  nas_msg.header.sequence_number = ++sec_seq_number;
   size += 7;
 
   mm_msg = &nas_msg.security_protected.plain.mm_msg;
@@ -732,6 +734,10 @@ static void generatePduSessionEstablishRequest(int Mod_id, uicc_t * uicc, as_nas
   mm_msg->uplink_nas_transport.pdusessionid = 10;
   mm_msg->uplink_nas_transport.requesttype = 1;
   size += 3;
+
+  mm_msg->uplink_nas_transport.snssai.length = 0;
+  mm_msg->uplink_nas_transport.snssai.value = NULL;
+  #if 0
   mm_msg->uplink_nas_transport.snssai.length = 4;
   //Fixme: it seems there are a lot of memory errors in this: this value was on the stack, 
   // but pushed  in a itti message to another thread
@@ -742,10 +748,11 @@ static void generatePduSessionEstablishRequest(int Mod_id, uicc_t * uicc, as_nas
   mm_msg->uplink_nas_transport.snssai.value[2] = (uicc->nssai_sd>>8)&0xFF; 
   mm_msg->uplink_nas_transport.snssai.value[3] = (uicc->nssai_sd)&0xFF;
   size += (1+1+4);
+  #endif
   int dnnSize=strlen(uicc->dnnStr);
   mm_msg->uplink_nas_transport.dnn.value=calloc(1,dnnSize+1);
   mm_msg->uplink_nas_transport.dnn.length = dnnSize + 1;
-  mm_msg->uplink_nas_transport.dnn.value[0] = dnnSize + 1;
+  mm_msg->uplink_nas_transport.dnn.value[0] = dnnSize;
   memcpy(mm_msg->uplink_nas_transport.dnn.value+1,uicc->dnnStr, dnnSize);
   size += (1+1+dnnSize+1);
 
@@ -757,7 +764,7 @@ static void generatePduSessionEstablishRequest(int Mod_id, uicc_t * uicc, as_nas
 
   stream_cipher.key        = ue_security_key[Mod_id]->knas_int;
   stream_cipher.key_length = 16;
-  stream_cipher.count      = 0;
+  stream_cipher.count      = sec_seq_number;
   stream_cipher.bearer     = 1;
   stream_cipher.direction  = 0;
   stream_cipher.message    = (unsigned char *)(initialNasMsg->data + 6);
@@ -769,7 +776,7 @@ static void generatePduSessionEstablishRequest(int Mod_id, uicc_t * uicc, as_nas
     &stream_cipher,
     mac);
 
-  printf("mac %x %x %x %x \n", mac[0], mac[1], mac[2], mac[3]);
+  LOG_I(NAS,"generatePduSessionEstablishRequest mac %x %x %x %x \n", mac[0], mac[1], mac[2], mac[3]);
   for(int i = 0; i < 4; i++){
      initialNasMsg->data[2+i] = mac[i];
   }
@@ -964,6 +971,37 @@ void *nas_nrue_task(void *args_p)
         msg_type = get_msg_type(pdu_buffer, NAS_DOWNLINK_DATA_IND(msg_p).nasMsg.length);
 
         switch(msg_type){
+          case REGISTRATION_ACCEPT:
+          {
+              LOG_I(NAS, "[UE] Received REGISTRATION ACCEPT message\n");
+
+              as_nas_info_t initialNasMsg;
+              memset(&initialNasMsg, 0, sizeof(as_nas_info_t));
+              generateRegistrationComplete(Mod_id,&initialNasMsg, NULL);
+              if(initialNasMsg.length > 0){
+                MessageDef *message_p;
+                message_p = itti_alloc_new_message(TASK_NAS_NRUE, 0, NAS_UPLINK_DATA_REQ);
+                NAS_UPLINK_DATA_REQ(message_p).UEid          = Mod_id;
+                NAS_UPLINK_DATA_REQ(message_p).nasMsg.data   = (uint8_t *)initialNasMsg.data;
+                NAS_UPLINK_DATA_REQ(message_p).nasMsg.length = initialNasMsg.length;
+                itti_send_msg_to_task(TASK_RRC_NRUE, instance, message_p);
+                LOG_I(NAS, "Send NAS_UPLINK_DATA_REQ message(RegistrationComplete)\n");
+              }
+
+              as_nas_info_t pduEstablishMsg;
+              memset(&pduEstablishMsg, 0, sizeof(as_nas_info_t));
+              generatePduSessionEstablishRequest(Mod_id, uicc, &pduEstablishMsg);
+              if(pduEstablishMsg.length > 0){
+                MessageDef *message_p;
+                message_p = itti_alloc_new_message(TASK_NAS_NRUE, 0, NAS_UPLINK_DATA_REQ);
+                NAS_UPLINK_DATA_REQ(message_p).UEid          = Mod_id;
+                NAS_UPLINK_DATA_REQ(message_p).nasMsg.data   = (uint8_t *)pduEstablishMsg.data;
+                NAS_UPLINK_DATA_REQ(message_p).nasMsg.length = pduEstablishMsg.length;
+                itti_send_msg_to_task(TASK_RRC_NRUE, instance, message_p);
+                LOG_I(NAS, "Send NAS_UPLINK_DATA_REQ message(PduSessionEstablishRequest)\n");
+              }
+              break;
+          } 
 
           case FGS_IDENTITY_REQUEST:
 	            generateIdentityResponse(&initialNasMsg,*(pdu_buffer+3), uicc);

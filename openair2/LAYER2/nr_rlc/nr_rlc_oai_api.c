@@ -885,7 +885,7 @@ static void add_drb_um(int rnti, struct NR_DRB_ToAddMod *s, NR_RLC_BearerConfig_
   /* TODO: accept other values? */
   if (logical_channel_group != 1) {
     LOG_E(RLC, "%s:%d:%s: fatal error\n", __FILE__, __LINE__, __FUNCTION__);
-    exit(1);
+  //  exit(1);
   }
 
   switch (r->present) {
