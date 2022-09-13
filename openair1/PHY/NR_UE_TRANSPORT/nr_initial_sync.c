@@ -282,6 +282,8 @@ static int cap_data = 0;
     /* process pss search on received buffer */
     sync_pos = pss_synchro_nr(ue, is, NO_RATE_CHANGE);
 
+   if (sync_pos < 0)
+        continue;
     if (sync_pos >= fp->nb_prefix_samples)
       ue->ssb_offset = sync_pos - fp->nb_prefix_samples;
     else
