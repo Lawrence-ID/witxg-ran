@@ -34,8 +34,8 @@
 //#define DEBUG_PDSCH
 //#define DEBUG_PDCCH
 
-#define CH_INTERP 0
-#define NO_INTERP 1
+#define CH_INTERP 1
+#define NO_INTERP 0
 
 int nr_pbch_dmrs_correlation(PHY_VARS_NR_UE *ue,
                              UE_nr_rxtx_proc_t *proc,
