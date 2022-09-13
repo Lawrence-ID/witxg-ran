@@ -197,7 +197,7 @@ int32_t generate_nr_prach(PHY_VARS_NR_UE *ue, uint8_t gNB_id, int frame, uint8_t
   }
 
   // now generate PRACH signal
-#ifdef NR_PRACH_DEBUG
+//#ifdef NR_PRACH_DEBUG
     if (NCS>0)
       LOG_I(PHY, "PRACH [UE %d] generate PRACH in frame.slot %d.%d for RootSeqIndex %d, Preamble Index %d, PRACH Format %s, NCS %d (N_ZC %d): Preamble_offset %d, Preamble_shift %d msg1 frequency start %d\n",
         Mod_id,
@@ -211,7 +211,7 @@ int32_t generate_nr_prach(PHY_VARS_NR_UE *ue, uint8_t gNB_id, int frame, uint8_t
         preamble_offset,
         preamble_shift,
         n_ra_prb);
-  #endif
+//  #endif
 
   //  nsymb = (frame_parms->Ncp==0) ? 14:12;
   //  subframe_offset = (unsigned int)frame_parms->ofdm_symbol_size*slot*nsymb;

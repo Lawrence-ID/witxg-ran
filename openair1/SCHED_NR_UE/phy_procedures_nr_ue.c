@@ -935,19 +935,19 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
 
       NR_PUSCH_TimeDomainResourceAllocationList_t *pusch_TimeDomainAllocationList = NULL;
       if(ul_bwp){
-        if (mac->ULbwp[ul_bwp-1] &&
-            mac->ULbwp[ul_bwp-1]->bwp_Dedicated &&
-            mac->ULbwp[ul_bwp-1]->bwp_Dedicated->pusch_Config &&
-            mac->ULbwp[ul_bwp-1]->bwp_Dedicated->pusch_Config->choice.setup &&
-            mac->ULbwp[ul_bwp-1]->bwp_Dedicated->pusch_Config->choice.setup->pusch_TimeDomainAllocationList) {
-          pusch_TimeDomainAllocationList = mac->ULbwp[ul_bwp-1]->bwp_Dedicated->pusch_Config->choice.setup->pusch_TimeDomainAllocationList->choice.setup;
+        if (mac->ULbwp[ul_bwp] &&
+            mac->ULbwp[ul_bwp]->bwp_Dedicated &&
+            mac->ULbwp[ul_bwp]->bwp_Dedicated->pusch_Config &&
+            mac->ULbwp[ul_bwp]->bwp_Dedicated->pusch_Config->choice.setup &&
+            mac->ULbwp[ul_bwp]->bwp_Dedicated->pusch_Config->choice.setup->pusch_TimeDomainAllocationList) {
+          pusch_TimeDomainAllocationList = mac->ULbwp[ul_bwp]->bwp_Dedicated->pusch_Config->choice.setup->pusch_TimeDomainAllocationList->choice.setup;
         }
-        else if (mac->ULbwp[ul_bwp-1] &&
-                 mac->ULbwp[ul_bwp-1]->bwp_Common &&
-                 mac->ULbwp[ul_bwp-1]->bwp_Common->pusch_ConfigCommon &&
-                 mac->ULbwp[ul_bwp-1]->bwp_Common->pusch_ConfigCommon->choice.setup &&
-                 mac->ULbwp[ul_bwp-1]->bwp_Common->pusch_ConfigCommon->choice.setup->pusch_TimeDomainAllocationList) {
-          pusch_TimeDomainAllocationList = mac->ULbwp[ul_bwp-1]->bwp_Common->pusch_ConfigCommon->choice.setup->pusch_TimeDomainAllocationList;
+        else if (mac->ULbwp[ul_bwp] &&
+                 mac->ULbwp[ul_bwp]->bwp_Common &&
+                 mac->ULbwp[ul_bwp]->bwp_Common->pusch_ConfigCommon &&
+                 mac->ULbwp[ul_bwp]->bwp_Common->pusch_ConfigCommon->choice.setup &&
+                 mac->ULbwp[ul_bwp]->bwp_Common->pusch_ConfigCommon->choice.setup->pusch_TimeDomainAllocationList) {
+          pusch_TimeDomainAllocationList = mac->ULbwp[ul_bwp]->bwp_Common->pusch_ConfigCommon->choice.setup->pusch_TimeDomainAllocationList;
         }
       }
       else if (mac->scc_SIB &&
@@ -962,11 +962,11 @@ bool nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
       NR_PDSCH_Config_t *pdsch_Config = NULL;
       NR_PDSCH_TimeDomainResourceAllocationList_t *pdsch_TimeDomainAllocationList = NULL;
       if(dl_bwp){
-        pdsch_Config = (mac->DLbwp[dl_bwp-1] && mac->DLbwp[dl_bwp-1]->bwp_Dedicated->pdsch_Config->choice.setup) ? mac->DLbwp[dl_bwp-1]->bwp_Dedicated->pdsch_Config->choice.setup : NULL;
-        if (mac->DLbwp[dl_bwp-1] && mac->DLbwp[dl_bwp-1]->bwp_Dedicated->pdsch_Config->choice.setup->pdsch_TimeDomainAllocationList)
+        pdsch_Config = (mac->DLbwp[dl_bwp] && mac->DLbwp[dl_bwp]->bwp_Dedicated->pdsch_Config->choice.setup) ? mac->DLbwp[dl_bwp]->bwp_Dedicated->pdsch_Config->choice.setup : NULL;
+        if (mac->DLbwp[dl_bwp] && mac->DLbwp[dl_bwp]->bwp_Dedicated->pdsch_Config->choice.setup->pdsch_TimeDomainAllocationList)
           pdsch_TimeDomainAllocationList = pdsch_Config->pdsch_TimeDomainAllocationList->choice.setup;
-        else if (mac->DLbwp[dl_bwp-1] && mac->DLbwp[dl_bwp-1]->bwp_Common->pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList)
-          pdsch_TimeDomainAllocationList = mac->DLbwp[dl_bwp-1]->bwp_Common->pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList;
+        else if (mac->DLbwp[dl_bwp] && mac->DLbwp[dl_bwp]->bwp_Common->pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList)
+          pdsch_TimeDomainAllocationList = mac->DLbwp[dl_bwp]->bwp_Common->pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList;
       }
       else if (mac->scc_SIB && mac->scc_SIB->downlinkConfigCommon.initialDownlinkBWP.pdsch_ConfigCommon->choice.setup)
         pdsch_TimeDomainAllocationList = mac->scc_SIB->downlinkConfigCommon.initialDownlinkBWP.pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList;

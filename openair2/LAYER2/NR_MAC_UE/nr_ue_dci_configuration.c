@@ -62,7 +62,17 @@ void fill_dci_search_candidates(NR_SearchSpace_t *ss,
   uint32_t Y = 0;
   if (slot >= 0)
     Y = get_Y(ss, slot, rnti);
+  int N_cce_sym = 0; // nb of rbs of coreset per symbol
+  for (int i=0;i<6;i++) {
+    for (int t=0;t<8;t++) {
+      N_cce_sym+=((rel15->coreset.frequency_domain_resource[i]>>t)&1);
+    }
+  }
+  int N_cces = N_cce_sym*rel15->coreset.duration;
   for (int maxL=16;maxL>0;maxL>>=1) {
+    
+    if (N_cces < maxL)
+       continue;
     find_aggregation_candidates(&aggregation,
                                 &number_of_candidates,
                                 ss,maxL);
@@ -70,15 +80,10 @@ void fill_dci_search_candidates(NR_SearchSpace_t *ss,
     if (number_of_candidates>0) {
       LOG_D(NR_MAC,"L %d, number of candidates %d, aggregation %d\n",maxL,number_of_candidates,aggregation);
       rel15->number_of_candidates += number_of_candidates;
-      int N_cce_sym = 0; // nb of rbs of coreset per symbol
-      for (int i=0;i<6;i++) {
-        for (int t=0;t<8;t++) {
-          N_cce_sym+=((rel15->coreset.frequency_domain_resource[i]>>t)&1);
-        }
-      }
-      int N_cces = N_cce_sym*rel15->coreset.duration;
+
       for (int j=0; j<number_of_candidates; i++,j++) {
-        int first_cce = aggregation * (( Y + CEILIDIV((j*N_cces),(aggregation*number_of_candidates)) + 0 ) % CEILIDIV(N_cces,aggregation));
+        //int first_cce = aggregation * (( Y + CEILIDIV((j*N_cces),(aggregation*number_of_candidates)) + 0 ) % CEILIDIV(N_cces,aggregation));
+        int first_cce = aggregation * (( Y + ((j*N_cces)/(aggregation*number_of_candidates)) + 0 ) % (N_cces/aggregation));
         LOG_D(NR_MAC,"Candidate %d of %d first_cce %d (L %d N_cces %d Y %d)\n", j, number_of_candidates, first_cce, aggregation, N_cces, Y);
         rel15->CCE[i] = first_cce;
         rel15->L[i] = aggregation;
@@ -105,7 +110,7 @@ void config_dci_pdu(NR_UE_MAC_INST_t *mac, fapi_nr_dl_config_dci_dl_pdu_rel15_t 
     initialDownlinkBWP =  scc!=NULL ? scc->downlinkConfigCommon->initialDownlinkBWP : &scc_SIB->downlinkConfigCommon.initialDownlinkBWP;
     initialUplinkBWP = scc!=NULL ? scc->uplinkConfigCommon->initialUplinkBWP : &scc_SIB->uplinkConfigCommon->initialUplinkBWP;
   }
-  bwp_Common = dl_bwp_id>0 ? mac->DLbwp[dl_bwp_id-1]->bwp_Common : NULL;
+  bwp_Common = dl_bwp_id>0 ? mac->DLbwp[dl_bwp_id]->bwp_Common : NULL;
 
   NR_SearchSpace_t *ss;
   NR_ControlResourceSet_t *coreset;
@@ -282,8 +287,8 @@ void ue_dci_configuration(NR_UE_MAC_INST_t *mac, fapi_nr_dl_config_request_t *dl
 
   uint8_t bwp_id = (mac->cg) ? mac->DL_BWP_Id : 0;
   //NR_ServingCellConfig_t *scd = mac->scg->spCellConfig->spCellConfigDedicated;
-  NR_BWP_DownlinkDedicated_t *bwpd  = (bwp_id>0) ? mac->DLbwp[bwp_id-1]->bwp_Dedicated : mac->cg->spCellConfig->spCellConfigDedicated->initialDownlinkBWP;
-  NR_BWP_DownlinkCommon_t *bwp_Common = (bwp_id>0) ? mac->DLbwp[bwp_id-1]->bwp_Common : &mac->scc_SIB->downlinkConfigCommon.initialDownlinkBWP;
+  NR_BWP_DownlinkDedicated_t *bwpd  = (bwp_id>0) ? mac->DLbwp[bwp_id]->bwp_Dedicated : mac->cg->spCellConfig->spCellConfigDedicated->initialDownlinkBWP;
+  NR_BWP_DownlinkCommon_t *bwp_Common = (bwp_id>0) ? mac->DLbwp[bwp_id]->bwp_Common : &mac->scc_SIB->downlinkConfigCommon.initialDownlinkBWP;
 
   LOG_D(NR_MAC, "[DCI_CONFIG] ra_rnti %p (%x) crnti %p (%x) t_crnti %p (%x)\n", &ra->ra_rnti, ra->ra_rnti, &mac->crnti, mac->crnti, &ra->t_crnti, ra->t_crnti);
 

@@ -490,16 +490,32 @@ void config_control_ue(NR_UE_MAC_INST_t *mac){
   if (scd->downlinkBWP_ToAddModList) {
     for (int i = 0; i < scd->downlinkBWP_ToAddModList->list.count; i++) {
       bwp_id = scd->downlinkBWP_ToAddModList->list.array[i]->bwp_Id;
-      mac->DLbwp[bwp_id-1] = scd->downlinkBWP_ToAddModList->list.array[i];
+      mac->DLbwp[bwp_id] = scd->downlinkBWP_ToAddModList->list.array[i];
     }
+  }
+  else
+  {
+     if (dl_bwp_id == 0)
+     {
+        mac->DLbwp[dl_bwp_id] = &mac->DLbwp_intial;
+        mac->DLbwp_intial.bwp_Dedicated = scd->initialDownlinkBWP;
+     }
   }
 
   // configure ULbwp
   if (scd->uplinkConfig->uplinkBWP_ToAddModList) {
     for (int i = 0; i < scd->uplinkConfig->uplinkBWP_ToAddModList->list.count; i++) {
       bwp_id = scd->uplinkConfig->uplinkBWP_ToAddModList->list.array[i]->bwp_Id;
-      mac->ULbwp[bwp_id-1] = scd->uplinkConfig->uplinkBWP_ToAddModList->list.array[i];
+      mac->ULbwp[bwp_id] = scd->uplinkConfig->uplinkBWP_ToAddModList->list.array[i];
     }
+  }
+  else
+  {
+     if (dl_bwp_id == 0)
+     {
+        mac->ULbwp[dl_bwp_id] = &mac->ULbwp_intial;
+        mac->ULbwp_intial.bwp_Dedicated = scd->uplinkConfig->initialUplinkBWP;
+     }
   }
 
   configure_ss_coreset(mac, scd, dl_bwp_id);
