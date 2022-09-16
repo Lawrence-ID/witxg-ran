@@ -633,14 +633,14 @@ int nr_rrc_mac_config_req_ue(
       LOG_D(NR_MAC, "In %s: Keeping ServingCellConfigCommonSIB\n", __FUNCTION__);
       config_common_ue_sa(mac,module_id,cc_idP);
 
-      int num_slots_ul = nr_slots_per_frame[mac->mib->subCarrierSpacingCommon];
+      int num_slots_ul = nr_slots_per_frame[mac->scc_SIB->uplinkConfigCommon->initialUplinkBWP.genericParameters.subcarrierSpacing];
       if(cfg->cell_config.frame_duplex_type == TDD){
         num_slots_ul = mac->scc_SIB->tdd_UL_DL_ConfigurationCommon->pattern1.nrofUplinkSlots;
         if (mac->scc_SIB->tdd_UL_DL_ConfigurationCommon->pattern1.nrofUplinkSymbols > 0) {
           num_slots_ul++;
         }
       }
-      LOG_I(NR_MAC, "Initializing ul_config_request. num_slots_ul = %d\n", num_slots_ul);
+      LOG_I(NR_MAC, "Initializing ul_config_request. num_slots_ul = %d, subCarrierSpacingCommon %d\n", num_slots_ul, mac->mib->subCarrierSpacingCommon);
       mac->ul_config_request = (fapi_nr_ul_config_request_t *)calloc(num_slots_ul, sizeof(fapi_nr_ul_config_request_t));
       for (int i=0; i<num_slots_ul; i++)
         pthread_mutex_init(&(mac->ul_config_request[i].mutex_ul_config), NULL);

@@ -165,6 +165,8 @@ void schedule_nr_mib(module_id_t module_idP, frame_t frameP, sub_frame_t slotP) 
                 schedule_ssb(frameP, slotP, scc, dl_req, i_ssb, ssbSubcarrierOffset, offset_pointa, (*(uint32_t*)cc->MIB_pdu.payload) & ((1<<24)-1));
                 fill_ssb_vrb_map(cc, prb_offset, ssbSubcarrierOffset, ssb_start_symbol, CC_id);
                 if (get_softmodem_params()->sa == 1) {
+                  LOG_D(MAC, "~~~~~~~~~~~~~~~~~~~~~~~~~~ 0 ssb_subcarrier_offset %d, ssb_offset_point_a %d\n",
+                             ssbSubcarrierOffset, offset_pointa);
                   get_type0_PDCCH_CSS_config_parameters(&gNB->type0_PDCCH_CSS_config[i_ssb],
                                                         frameP,
                                                         mib,
@@ -194,6 +196,8 @@ void schedule_nr_mib(module_id_t module_idP, frame_t frameP, sub_frame_t slotP) 
                 schedule_ssb(frameP, slotP, scc, dl_req, i_ssb, ssbSubcarrierOffset, offset_pointa, (*(uint32_t*)cc->MIB_pdu.payload) & ((1<<24)-1));
                 fill_ssb_vrb_map(cc, prb_offset, ssbSubcarrierOffset, ssb_start_symbol, CC_id);
                 if (get_softmodem_params()->sa == 1) {
+                  LOG_D(MAC, "~~~~~~~~~~~~~~~~~~~~~~~~~~ 1 ssb_subcarrier_offset %d, ssb_offset_point_a %d\n",
+                             ssbSubcarrierOffset, offset_pointa);
                   get_type0_PDCCH_CSS_config_parameters(&gNB->type0_PDCCH_CSS_config[i_ssb],
                                                         frameP,
                                                         mib,
@@ -232,6 +236,8 @@ void schedule_nr_mib(module_id_t module_idP, frame_t frameP, sub_frame_t slotP) 
                 num_ssb++;
                 AssertFatal(num_ssb<2,"beamforming currently not supported for more than one SSB per slot\n");
                 if (get_softmodem_params()->sa == 1) {
+                  LOG_D(MAC, "~~~~~~~~~~~~~~~~~~~~~~~~~~ 2 ssb_subcarrier_offset %d, ssb_offset_point_a %d\n",
+                             ssbSubcarrierOffset, offset_pointa);
                   get_type0_PDCCH_CSS_config_parameters(&gNB->type0_PDCCH_CSS_config[i_ssb],
                                                         frameP,
                                                         mib,
@@ -585,7 +591,11 @@ void schedule_nr_sib1(module_id_t module_idP, frame_t frameP, sub_frame_t slotP)
                                gNB_mac->common_channels->ServingCellConfigCommon->dmrs_TypeA_Position,
                                1, &is_typeA,
                                &startSymbolIndex, &nrOfSymbols);
-
+      LOG_D(PHY, "type0_pdcch_ss_mux_pattern %d, is_typeA %d, startSymbolIndex %d, nrOfSymbols %d\n", 
+                 type0_PDCCH_CSS_config->type0_pdcch_ss_mux_pattern,
+                 is_typeA,
+                 startSymbolIndex,
+                 nrOfSymbols);
       AssertFatal((startSymbolIndex+nrOfSymbols)<14,"SIB1 TDA %d would cause overlap with CSI-RS. Please select a different SIB1 TDA.\n",time_domain_allocation);
 
       int mappingtype = is_typeA? typeA: typeB;

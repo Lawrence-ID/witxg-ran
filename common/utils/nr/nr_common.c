@@ -395,6 +395,9 @@ uint16_t config_bandwidth(int mu, int nb_rb, int nr_band)
         return 100;
       AssertFatal(1==0,"Number of DL resource blocks %d undefined for mu %d and band %d\n", nb_rb, mu, nr_band);
       break;
+    case 3 :
+      if (nb_rb<=66)
+        return 100;
     default:
       AssertFatal(1==0,"Numerology %d undefined for band %d in FR1\n", mu,nr_band);
    }

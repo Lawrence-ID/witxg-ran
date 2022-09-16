@@ -281,6 +281,9 @@ void schedule_nr_prach(module_id_t module_idP, frame_t frameP, sub_frame_t slotP
 
       uint16_t format0 = format&0xff;      // first column of format from table
       uint16_t format1 = (format>>8)&0xff; // second column of format from table
+      
+      if (mu == 3)
+          N_t_slot = 1; // temp workaroud, in case prach to be processed too long
 
       if (N_RA_slot > 1) { //more than 1 PRACH slot in a subframe
         if (slotP%2 == 1)

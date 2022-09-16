@@ -2154,7 +2154,7 @@ int nr_rx_pusch(PHY_VARS_gNB *gNB,
       uint pusch_amp;
       if (symbol == (rel15_ul->start_symbol_index + rel15_ul->nr_of_symbols - 1)) {
         static int cnt = 0;
-        if ((cnt & 0x08) == 100)
+        if ((cnt & 0x40) == 100)
         {
           pusch_amp = cal_amp(&gNB->pusch_vars[ulsch_id]->rxdataF_ext[0][symbol * nb_re_pusch], nb_re_pusch);
           //LOG_I(PHY, "UL AMP frame %d %d, symbol %d, rbs %d, res %d, time %d, freq %d \n", frame, slot, symbol, nb_re_pusch/12, nb_re_pusch, g_ul_time_amp[symbol], g_ul_freq_amp[symbol], pusch_amp);

@@ -1731,6 +1731,16 @@ int get_nr_prach_info_from_index(uint8_t index,
               return 0; // no prach in even slots @ 30kHz for 1 prach per subframe
             }
           }
+          else if (mu == 3)
+          {
+            int slot_local = slot - subframe * 8;
+            if ((*N_RA_slot <= 1) && (slot_local != 1))
+              return 0; // no prach in even slots @ 30kHz for 1 prach per subframe 
+            else if (slot_local > 1)
+              return 0;   
+              LOG_D(PHY, "subframe %d slot %d, *N_RA_slot %d\n", subframe, slot, *N_RA_slot);            
+          }
+
           for(int i = 0; i <= subframe ; i++) {
             if ( (s_map >> i) & 0x01) {
               (*RA_sfn_index)++;
@@ -3554,6 +3564,10 @@ void get_type0_PDCCH_CSS_config_parameters(NR_Type0_PDCCH_CSS_config_t *type0_PD
     else
       scs_pdcch = NR_SubcarrierSpacing_kHz30;
   }
+
+  if (scs_ssb == 3)
+    scs_pdcch = NR_SubcarrierSpacing_kHz120;
+
   type0_PDCCH_CSS_config->scs_pdcch = scs_pdcch;
   type0_PDCCH_CSS_config->ssb_index = ssb_index;
   type0_PDCCH_CSS_config->frame = frameP;
@@ -3568,7 +3582,7 @@ void get_type0_PDCCH_CSS_config_parameters(NR_Type0_PDCCH_CSS_config_t *type0_PD
   type0_PDCCH_CSS_config->num_symbols = -1;
   type0_PDCCH_CSS_config->rb_offset = -1;
   LOG_D(NR_MAC,"NR_SubcarrierSpacing_kHz30 %d, scs_ssb %d, scs_pdcch %d, min_chan_bw %d\n",(int)NR_SubcarrierSpacing_kHz30,(int)scs_ssb,(int)scs_pdcch,min_channel_bw);
-
+ 
   //  type0-pdcch coreset
   switch( ((int)scs_ssb << 3) | (int)scs_pdcch ){
     case (NR_SubcarrierSpacing_kHz15 << 5) | NR_SubcarrierSpacing_kHz15:
@@ -3639,9 +3653,9 @@ void get_type0_PDCCH_CSS_config_parameters(NR_Type0_PDCCH_CSS_config_t *type0_PD
 
     case (NR_SubcarrierSpacing_kHz120 << 3) | NR_SubcarrierSpacing_kHz120:
       AssertFatal(index_4msb < 8, "38.213 Table 13-8 4 MSB out of range\n");
-      if(index_4msb & 0x3){
+      if(index_4msb <= 0x3){
         type0_PDCCH_CSS_config->type0_pdcch_ss_mux_pattern = 1;
-      }else if(index_4msb & 0x0c){
+      }else {
         type0_PDCCH_CSS_config->type0_pdcch_ss_mux_pattern = 3;
       }
 
@@ -3684,8 +3698,8 @@ void get_type0_PDCCH_CSS_config_parameters(NR_Type0_PDCCH_CSS_config_t *type0_PD
       break;
   }
 
-  LOG_D(NR_MAC,"Coreset0: index_4msb=%d, num_rbs=%d, num_symb=%d, rb_offset=%d\n",
-        index_4msb,type0_PDCCH_CSS_config->num_rbs,type0_PDCCH_CSS_config->num_symbols,type0_PDCCH_CSS_config->rb_offset );
+ LOG_D(NR_MAC,"Coreset0: index_4msb=%d, pattern %d, num_rbs=%d, num_symb=%d, rb_offset=%d\n",
+        index_4msb,type0_PDCCH_CSS_config->type0_pdcch_ss_mux_pattern, type0_PDCCH_CSS_config->num_rbs,type0_PDCCH_CSS_config->num_symbols,type0_PDCCH_CSS_config->rb_offset );
 
   AssertFatal(type0_PDCCH_CSS_config->num_rbs != -1, "Type0 PDCCH coreset num_rbs undefined, index_4msb=%d, min_channel_bw %d, scs_ssb %d, scs_pdcch %d\n",index_4msb,min_channel_bw,(int)scs_ssb,(int)scs_pdcch);
   AssertFatal(type0_PDCCH_CSS_config->num_symbols != -1, "Type0 PDCCH coreset num_symbols undefined");
@@ -3886,6 +3900,7 @@ void get_type0_PDCCH_CSS_config_parameters(NR_Type0_PDCCH_CSS_config_t *type0_PD
 
   type0_PDCCH_CSS_config->n_0 = ((uint32_t)(big_o*(1<<scs_pdcch)) + (uint32_t)(type0_PDCCH_CSS_config->ssb_index*big_m))%num_slot_per_frame;
   type0_PDCCH_CSS_config->cset_start_rb = ssb_offset_point_a - type0_PDCCH_CSS_config->rb_offset;
+  LOG_D(MAC, "ssb_offset_point_a %d, rb_offset %d\n", ssb_offset_point_a, type0_PDCCH_CSS_config->rb_offset);
 
 }
 

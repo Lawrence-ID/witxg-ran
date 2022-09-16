@@ -1748,7 +1748,7 @@ static void build_ro_list(NR_UE_MAC_INST_t *mac) {
     format = ((uint8_t) prach_config_info_p[0]) | (format2<<8);
 
     slot_shift_for_map = mu;
-    if ( (mu == 1) && (prach_config_info_p[6] <= 1) )
+    if ( ((mu == 1) || (mu == 3) )&& (prach_config_info_p[6] <= 1) )
       // no prach in even slots @ 30kHz for 1 prach per subframe
       even_slot_invalid = true;
     else
@@ -2792,6 +2792,9 @@ void nr_ue_sib1_scheduler(module_id_t module_idP,
   uint8_t scs_ssb = get_softmodem_params()->numerology;
   uint16_t ssb_offset_point_a = (ssb_start_subcarrier - ssb_subcarrier_offset)/12;
 
+  LOG_D(MAC, "ssb_start_subcarrier %d, ssb_subcarrier_offset %d, ssb_offset_point_a %d\n",
+        ssb_start_subcarrier, ssb_subcarrier_offset, ssb_offset_point_a);
+        
   get_type0_PDCCH_CSS_config_parameters(&mac->type0_PDCCH_CSS_config,
                                         frame,
                                         mac->mib,
