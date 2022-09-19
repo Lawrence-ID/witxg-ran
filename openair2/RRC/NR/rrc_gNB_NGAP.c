@@ -324,7 +324,7 @@ nr_rrc_pdcp_config_security(
     SET_LOG_DUMP(DEBUG_SECURITY) ;
   }
 
-
+#if 0
   if ( LOG_DUMPFLAG( DEBUG_SECURITY ) ) {
     if (print_keys == 1 ) {
       print_keys =0;
@@ -333,7 +333,7 @@ nr_rrc_pdcp_config_security(
       LOG_DUMPMSG(NR_RRC, DEBUG_SECURITY, kRRCint, 16,"\nKRRCint:" );
     }
   }
-
+#endif
   pdcp_config_set_security(
       ctxt_pP,
       NULL,      /* pdcp_pP not used anymore in NR */
