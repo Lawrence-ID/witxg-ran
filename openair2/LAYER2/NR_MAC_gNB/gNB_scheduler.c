@@ -122,6 +122,7 @@ void gNB_dlsch_ulsch_scheduler(module_id_t module_idP,
   gNB_MAC_INST *gNB = RC.nrmac[module_idP];
   NR_COMMON_channels_t *cc = gNB->common_channels;
   NR_ServingCellConfigCommon_t        *scc     = cc->ServingCellConfigCommon;
+  int scs = *scc->ssbSubcarrierSpacing;
 
   if (slot==0 && (*scc->downlinkConfigCommon->frequencyInfoDL->frequencyBandList.list.array[0]>=257)) {
     //FR2
@@ -228,11 +229,13 @@ void gNB_dlsch_ulsch_scheduler(module_id_t module_idP,
   }
 
   // This schedules the DCI for Uplink and subsequently PUSCH
-  nr_schedule_ulsch(module_idP, frame, slot);
+  if ((scs != 3) || ((slot%8)== 0))
+     nr_schedule_ulsch(module_idP, frame, slot);
 
   // This schedules the DCI for Downlink and PDSCH
   start_meas(&gNB->schedule_dlsch);
-  nr_schedule_ue_spec(module_idP, frame, slot); 
+  if ((scs != 3) || ((slot%8)== 0))
+      nr_schedule_ue_spec(module_idP, frame, slot); 
   stop_meas(&gNB->schedule_dlsch);
 
   nr_schedule_pucch(RC.nrmac[module_idP], frame, slot);
