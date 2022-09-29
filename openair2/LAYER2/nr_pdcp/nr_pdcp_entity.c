@@ -35,7 +35,7 @@ static void nr_pdcp_entity_recv_pdu(nr_pdcp_entity_t *entity,
                                     char *_buffer, int size)
 {
   unsigned char    *buffer = (unsigned char *)_buffer;
-  nr_pdcp_sdu_t    *sdu;
+  nr_pdcp_sdu_t    *cur_sdu;
   int              rcvd_sn;
   uint32_t         rcvd_hfn;
   uint32_t         rcvd_count;
@@ -111,37 +111,80 @@ static void nr_pdcp_entity_recv_pdu(nr_pdcp_entity_t *entity,
     }
   }
 
-  if (rcvd_count < entity->rx_deliv
-      || nr_pdcp_sdu_in_list(entity->rx_list, rcvd_count)) {
-    LOG_W(PDCP, "discard NR PDU rcvd_count=%d, entity->rx_deliv %d,sdu_in_list %d\n", rcvd_count,entity->rx_deliv,nr_pdcp_sdu_in_list(entity->rx_list,rcvd_count));
+
+//entity->rx_deliv is next to deliver
+  if (rcvd_count < entity->rx_deliv)
+  {
+    LOG_W(PDCP, "discard NR PDU rcvd_count=%d, already deliver! \n", rcvd_count);
     return;
   }
 
-  sdu = nr_pdcp_new_sdu(rcvd_count,
-                        (char *)buffer + header_size,
-                        size - header_size - integrity_size);
-  entity->rx_list = nr_pdcp_sdu_list_add(entity->rx_list, sdu);
-  entity->rx_size += size-header_size;
 
-  if (rcvd_count >= entity->rx_next) {
-    entity->rx_next = rcvd_count + 1;
+#if 0
+  int last_deliver = entity->rx_deliv;
+  if (rcvd_count - entity->rx_deliv >= PDCP_RECV_WINDOW_MAX_LEN)
+  {
+    LOG_W(PDCP, "%d recv, %d to be deliver, too many out of order, deliver all  %d in window! \n", rcvd_count,entity->rx_deliv,pdcp_recv_in_window_count);
+    for(int i=0;i<PDCP_RECV_WINDOW_MAX_LEN;i++)
+    {
+      int rcvd_count_in_window = (entity->window_start_index + entity->rx_deliv) % PDCP_RECV_WINDOW_MAX_LEN;
+      nr_pdcp_sdu_t *cur = pdcp_recv_window[rcvd_count_in_window+i];
+      if (cur != NULL)
+      {
+        entity->deliver_sdu(entity->deliver_sdu_data, entity,
+                            cur->buffer, cur->size);
+        nr_pdcp_free_sdu(cur);
+        pdcp_recv_window[rcvd_count_in_window+i]= NULL;
+        entity->rx_deliv = last_deliver + i + 1;
+      }
+    }
+    pdcp_recv_in_window_count = 0;
+    entity->window_start_index = 0;
+    LOG_W(PDCP, "%d recv, %d to be deliver, \n", rcvd_count,entity->rx_deliv);
+
+    return;
+  }
+#endif
+
+  int rcvd_count_in_window = (entity->window_start_index + rcvd_count - entity->rx_deliv) % PDCP_RECV_WINDOW_MAX_LEN;
+
+  if (entity->pdcp_recv_window[rcvd_count_in_window] != NULL)
+  {
+    LOG_W(PDCP, "discard NR PDU rcvd_count=%d, already recv! \n", rcvd_count);
+    return;
   }
 
-  /* TODO(?): out of order delivery */
+  LOG_W(PDCP, "recv NR PDU rcvd_count=%d, rx_deliv %d, window_start_index %d, rcvd_count_in_window %d, pdcp_recv_in_window_count %d\n", 
+  rcvd_count,entity->rx_deliv,entity->window_start_index,rcvd_count_in_window,entity->pdcp_recv_in_window_count);
 
-  if (rcvd_count == entity->rx_deliv) {
+  cur_sdu = nr_pdcp_new_sdu(rcvd_count,
+                        (char *)buffer + header_size,
+                        size - header_size - integrity_size);
+
+  entity->pdcp_recv_window[rcvd_count_in_window] = cur_sdu;
+  entity->pdcp_recv_in_window_count ++;
+  if (rcvd_count == entity->rx_deliv) 
+  {
     /* deliver all SDUs starting from rx_deliv up to discontinuity or end of list */
-    uint32_t count = entity->rx_deliv;
-    while (entity->rx_list != NULL && count == entity->rx_list->count) {
-      nr_pdcp_sdu_t *cur = entity->rx_list;
+    int delivery_index=rcvd_count_in_window;
+    int delivery_count=0;
+
+    while (cur_sdu != NULL)
+    {
       entity->deliver_sdu(entity->deliver_sdu_data, entity,
-                          cur->buffer, cur->size);
-      entity->rx_list = cur->next;
-      entity->rx_size -= cur->size;
-      nr_pdcp_free_sdu(cur);
-      count++;
+                          cur_sdu->buffer, cur_sdu->size);
+      nr_pdcp_free_sdu(cur_sdu);
+      entity->pdcp_recv_window[delivery_index]= NULL;
+      delivery_count++;
+      delivery_index++;
+      delivery_index = delivery_index % PDCP_RECV_WINDOW_MAX_LEN;
+      cur_sdu = entity->pdcp_recv_window[delivery_index];
+
     }
-    entity->rx_deliv = count;
+
+    entity->rx_deliv = rcvd_count+delivery_count;
+    entity->window_start_index = delivery_index;
+    entity->pdcp_recv_in_window_count -= delivery_count;
   }
 
   if (entity->t_reordering_start != 0 && entity->rx_deliv >= entity->rx_reord) {
@@ -394,6 +437,11 @@ nr_pdcp_entity_t *new_nr_pdcp_entity(
   ret->window_size   = 1 << (sn_size - 1);
 
   ret->is_gnb = is_gnb;
+
+  ret->pdcp_recv_in_window_count = 0;
+  ret->window_start_index = 0;
+  memset(ret->pdcp_recv_window, 0, sizeof(ret->pdcp_recv_window));
+//  printf("sizeof(ret->pdcp_recv_window) %d \n",sizeof(ret->pdcp_recv_window));
 
   nr_pdcp_entity_set_security(ret,
                               integrity_algorithm, (char *)integrity_key,

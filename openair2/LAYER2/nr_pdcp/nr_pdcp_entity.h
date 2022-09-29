@@ -32,6 +32,7 @@ typedef enum {
   NR_PDCP_SRB
 } nr_pdcp_entity_type_t;
 
+#define PDCP_RECV_WINDOW_MAX_LEN   300
 typedef struct nr_pdcp_entity_t {
   nr_pdcp_entity_type_t type;
 
@@ -114,6 +115,11 @@ typedef struct nr_pdcp_entity_t {
   nr_pdcp_sdu_t *rx_list;
   int           rx_size;
   int           rx_maxsize;
+
+  nr_pdcp_sdu_t *pdcp_recv_window[PDCP_RECV_WINDOW_MAX_LEN];
+  uint32_t pdcp_recv_in_window_count;
+  uint32_t window_start_index;
+
 } nr_pdcp_entity_t;
 
 nr_pdcp_entity_t *new_nr_pdcp_entity(
