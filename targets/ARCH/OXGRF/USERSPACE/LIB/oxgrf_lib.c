@@ -34,7 +34,7 @@ static int transmiting = 0;
 #endif
 static bool running = false;
 
-#define RX_MTU         30720/2
+#define RX_MTU         30720
 #define BUFFER_SIZE    (122880 * 10 * sizeof(int))
 #define NCHAN_PER_DEV  4
 static void *cache_buf[NCHAN_PER_DEV];
