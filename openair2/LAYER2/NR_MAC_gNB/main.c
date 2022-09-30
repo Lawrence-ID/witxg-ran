@@ -79,17 +79,35 @@ void clear_mac_stats(gNB_MAC_INST *gNB) {
   }
 }
 
+#define DUMP_MAC_STATUS_MAX_UE_NUM 5
+#define DUMP_MAC_STATUS_MAX_LC_NUM 64
+uint64_t dlsch_total_last[DUMP_MAC_STATUS_MAX_UE_NUM]={0};
+uint64_t ulsch_total_last[DUMP_MAC_STATUS_MAX_UE_NUM]={0};
+uint64_t mac_lc_dl_last[DUMP_MAC_STATUS_MAX_UE_NUM][DUMP_MAC_STATUS_MAX_LC_NUM]={0};
+uint64_t mac_lc_ul_last[DUMP_MAC_STATUS_MAX_UE_NUM][DUMP_MAC_STATUS_MAX_LC_NUM]={0};
+
 size_t dump_mac_stats(gNB_MAC_INST *gNB, char *output, size_t strlen, bool reset_rsrp)
 {
   int num = 1;
   const char *begin = output;
   const char *end = output + strlen;
-
+  int ue_index = 0;
   pthread_mutex_lock(&gNB->UE_info.mutex);
   UE_iterator(gNB->UE_info.list, UE) {
     NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
     NR_mac_stats_t *stats = &UE->mac_stats;
     const int avg_rsrp = stats->num_rsrp_meas > 0 ? stats->cumul_rsrp / stats->num_rsrp_meas : 0;
+
+    output += snprintf(output,
+                       end - output,
+                       "SPEED: PHY DL %6dkbps, UL %6dkbps \n",
+                       (stats->dl.total_bytes-dlsch_total_last[ue_index])/128,
+                       (stats->ul.total_bytes-ulsch_total_last[ue_index])/128);
+    output += snprintf(output,
+                       end - output,
+                       "SPEED: MAC DL %6dkbps, UL %6dkbps \n",
+                       (stats->dl.lc_bytes[4]-mac_lc_dl_last[ue_index][4])/128,
+                       (stats->ul.lc_bytes[4]-mac_lc_ul_last[ue_index][4])/128);
 
     output += snprintf(output,
                        end - output,
@@ -159,7 +177,16 @@ size_t dump_mac_stats(gNB_MAC_INST *gNB, char *output, size_t strlen, bool reset
                            UE->rnti,
                            lc_id,
                            stats->ul.lc_bytes[lc_id]);
+      if (reset_rsrp) {
+      // only count when called by gNB_dlsch_ulsch_scheduler
+          mac_lc_dl_last[ue_index][lc_id]=stats->dl.lc_bytes[lc_id];
+          mac_lc_ul_last[ue_index][lc_id]=stats->ul.lc_bytes[lc_id];}    
     }
+    if (reset_rsrp) {
+      // only count when called by gNB_dlsch_ulsch_scheduler
+          dlsch_total_last[ue_index]=stats->dl.total_bytes;
+          ulsch_total_last[ue_index]=stats->ul.total_bytes;}
+    ue_index++;
   }
   pthread_mutex_unlock(&gNB->UE_info.mutex);
   return output - begin;
