@@ -32,7 +32,7 @@ typedef enum {
   NR_PDCP_SRB
 } nr_pdcp_entity_type_t;
 
-#define PDCP_RECV_WINDOW_MAX_LEN   300
+#define PDCP_RECV_WINDOW_MAX_LEN   200
 typedef struct nr_pdcp_entity_t {
   nr_pdcp_entity_type_t type;
 

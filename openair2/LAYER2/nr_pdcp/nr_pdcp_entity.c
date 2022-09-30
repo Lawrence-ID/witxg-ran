@@ -120,31 +120,65 @@ static void nr_pdcp_entity_recv_pdu(nr_pdcp_entity_t *entity,
   }
 
 
-#if 0
-  int last_deliver = entity->rx_deliv;
   if (rcvd_count - entity->rx_deliv >= PDCP_RECV_WINDOW_MAX_LEN)
   {
-    LOG_W(PDCP, "%d recv, %d to be deliver, too many out of order, deliver all  %d in window! \n", rcvd_count,entity->rx_deliv,pdcp_recv_in_window_count);
-    for(int i=0;i<PDCP_RECV_WINDOW_MAX_LEN;i++)
-    {
-      int rcvd_count_in_window = (entity->window_start_index + entity->rx_deliv) % PDCP_RECV_WINDOW_MAX_LEN;
-      nr_pdcp_sdu_t *cur = pdcp_recv_window[rcvd_count_in_window+i];
-      if (cur != NULL)
-      {
-        entity->deliver_sdu(entity->deliver_sdu_data, entity,
-                            cur->buffer, cur->size);
-        nr_pdcp_free_sdu(cur);
-        pdcp_recv_window[rcvd_count_in_window+i]= NULL;
-        entity->rx_deliv = last_deliver + i + 1;
-      }
-    }
-    pdcp_recv_in_window_count = 0;
-    entity->window_start_index = 0;
-    LOG_W(PDCP, "%d recv, %d to be deliver, \n", rcvd_count,entity->rx_deliv);
+    //if max=100, rx_deliv=5,rcvd_count=108, 108 need put in 8, so 
+    //step1: need to deliver 5,6,7,8, rx_deliv and window_start_index should be 8.
+    //step2: check from 9.
+    //step3: use normal procedure: store 108, and check whether to deliver
+    
+    int num_need_to_delivery = rcvd_count - entity->rx_deliv - PDCP_RECV_WINDOW_MAX_LEN + 1; //be 4
+    LOG_W(PDCP, "%d recv, %d wait to recv, too many in window, deliver %d in window! \n", rcvd_count,entity->rx_deliv,num_need_to_delivery);
 
-    return;
+    //step1: deliver 5,6,7,8 here.
+    int real_deliver_num = 0;
+    for(uint32_t i=entity->window_start_index;i<entity->window_start_index+num_need_to_delivery;i++)
+    {
+        cur_sdu = entity->pdcp_recv_window[i % PDCP_RECV_WINDOW_MAX_LEN];
+        LOG_D(PDCP, "in step1: i %d, index %d, cur_sdu %p \n",i,i % PDCP_RECV_WINDOW_MAX_LEN,cur_sdu);
+        if (cur_sdu != NULL)
+        {
+          entity->deliver_sdu(entity->deliver_sdu_data, entity,
+                              cur_sdu->buffer, cur_sdu->size);
+          nr_pdcp_free_sdu(cur_sdu);
+          entity->pdcp_recv_window[i % PDCP_RECV_WINDOW_MAX_LEN] = NULL;
+          real_deliver_num++;
+        }
+    }
+    entity->rx_deliv = entity->rx_deliv + num_need_to_delivery; 
+    entity->window_start_index = (entity->window_start_index + num_need_to_delivery) % PDCP_RECV_WINDOW_MAX_LEN;
+    entity->pdcp_recv_in_window_count -= real_deliver_num;
+
+    LOG_D(PDCP, "step1: rx_deliv %d, window_start_index %d, real_deliver_num %d, pdcp_recv_in_window_count %d\n", 
+          entity->rx_deliv,entity->window_start_index,real_deliver_num,entity->pdcp_recv_in_window_count);
+
+    //step2: 
+    // after deliver 5,6,7,8; 8 is free for 108, and 108 will store in 8 later.
+    // rx_deliv and  window_start_index should be for 9, and check from 9.
+    int check_next_index = entity->window_start_index;
+    cur_sdu = entity->pdcp_recv_window[check_next_index];
+    real_deliver_num = 0;
+    while(cur_sdu != NULL)
+    {
+      LOG_D(PDCP, "in step2: check_next_index %d, real_deliver_num %d\n", 
+          check_next_index,real_deliver_num);
+      entity->deliver_sdu(entity->deliver_sdu_data, entity,
+                            cur_sdu->buffer, cur_sdu->size);
+      //printf("%d \n",10/real_deliver_num);
+      nr_pdcp_free_sdu(cur_sdu);
+      entity->pdcp_recv_window[check_next_index]= NULL;
+      real_deliver_num++;
+      check_next_index++;
+      check_next_index = check_next_index % PDCP_RECV_WINDOW_MAX_LEN;
+      cur_sdu = entity->pdcp_recv_window[check_next_index];
+    }
+    entity->rx_deliv = entity->rx_deliv + real_deliver_num; 
+    entity->window_start_index = (entity->window_start_index + real_deliver_num) % PDCP_RECV_WINDOW_MAX_LEN;
+    entity->pdcp_recv_in_window_count -= real_deliver_num;    
+
+    LOG_D(PDCP, "step2: rx_deliv %d, window_start_index %d, real_deliver_num %d, pdcp_recv_in_window_count %d\n", 
+          entity->rx_deliv,entity->window_start_index,real_deliver_num,entity->pdcp_recv_in_window_count);
   }
-#endif
 
   int rcvd_count_in_window = (entity->window_start_index + rcvd_count - entity->rx_deliv) % PDCP_RECV_WINDOW_MAX_LEN;
 
@@ -154,7 +188,7 @@ static void nr_pdcp_entity_recv_pdu(nr_pdcp_entity_t *entity,
     return;
   }
 
-  LOG_W(PDCP, "recv NR PDU rcvd_count=%d, rx_deliv %d, window_start_index %d, rcvd_count_in_window %d, pdcp_recv_in_window_count %d\n", 
+  LOG_D(PDCP, "recv NR PDU rcvd_count=%d, rx_deliv %d, window_start_index %d, rcvd_count_in_window %d, pdcp_recv_in_window_count %d\n", 
   rcvd_count,entity->rx_deliv,entity->window_start_index,rcvd_count_in_window,entity->pdcp_recv_in_window_count);
 
   cur_sdu = nr_pdcp_new_sdu(rcvd_count,
