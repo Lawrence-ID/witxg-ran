@@ -1666,6 +1666,7 @@ static void build_ro_list(NR_UE_MAC_INST_t *mac) {
 
   uint8_t config_index, mu;
   int msg1_FDM;
+  int config_the;
 
   uint8_t prach_conf_period_idx;
   uint8_t nb_of_frames_per_prach_conf_period;
@@ -1748,13 +1749,18 @@ static void build_ro_list(NR_UE_MAC_INST_t *mac) {
     format = ((uint8_t) prach_config_info_p[0]) | (format2<<8);
 
     slot_shift_for_map = mu;
-    if ( ((mu == 1) || (mu == 3) )&& (prach_config_info_p[6] <= 1) )
+    if (unpaired == 1)
+       config_the =67;
+    else 
+       config_the =87;
+       
+    if ( ((mu == 1) || (mu == 3) )&& (prach_config_info_p[6] <= 1) && (config_index >= config_the))
       // no prach in even slots @ 30kHz for 1 prach per subframe
       even_slot_invalid = true;
     else
       even_slot_invalid = false;
   } // FR2 / FR1
-
+  
   prach_assoc_pattern.nb_of_prach_conf_period_in_max_period = MAX_NB_PRACH_CONF_PERIOD_IN_ASSOCIATION_PATTERN_PERIOD / x;
   nb_of_frames_per_prach_conf_period = x;
 
@@ -1777,7 +1783,7 @@ static void build_ro_list(NR_UE_MAC_INST_t *mac) {
     for (prach_conf_period_frame_idx=0; prach_conf_period_frame_idx<nb_of_frames_per_prach_conf_period; prach_conf_period_frame_idx++) {
       frame = (prach_conf_period_idx * nb_of_frames_per_prach_conf_period) + prach_conf_period_frame_idx;
 
-      LOG_D(NR_MAC,"PRACH Conf Period Frame Idx %d - Frame %d\n", prach_conf_period_frame_idx, frame);
+      LOG_D(NR_MAC,"PRACH Conf Period Frame Idx %d - Frame %d, %d, 0x%02x\n", prach_conf_period_frame_idx, frame, slot_shift_for_map, s_map);
       // Is it a valid frame for this PRACH configuration index? (n_sfn mod x = y)
       if ( (frame%x)==y || (frame%x)==y2 ) {
 
@@ -1792,7 +1798,8 @@ static void build_ro_list(NR_UE_MAC_INST_t *mac) {
             // Additionally, for 30kHz/120kHz, we must check for the n_RA_Slot param also
             if ( even_slot_invalid && (slot%2 == 0) )
                 continue; // no prach in even slots @ 30kHz/120kHz for 1 prach per 60khz slot/subframe
-
+            if ((config_index < config_the) && ((slot % (1<<mu)) != 0))
+                continue;
             // We're good: valid frame and valid slot
             // Compute all the PRACH occasions in the slot
 
