@@ -701,7 +701,7 @@ void dlsch_channel_level_TM34_meas(int *ch00,
                                    unsigned short nb_rb)
 {
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
 
   short rb;
   unsigned char nre=12;
@@ -1017,7 +1017,7 @@ void lte_ue_measurements(PHY_VARS_UE *ue,
   //int rx_power[NUMBER_OF_CONNECTED_eNB_MAX];
   int i;
   unsigned int limit,subband;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *dl_ch0_128,*dl_ch1_128;
 #elif defined(__arm__)
   int16x8_t *dl_ch0_128, *dl_ch1_128;
@@ -1213,7 +1213,7 @@ void lte_ue_measurements(PHY_VARS_UE *ue,
         //printf("aarx=%d", aarx);
         // skip the first 4 RE due to interpolation filter length of 5 (not possible to skip 5 due to 128i alignment, must be multiple of 128bit)
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
        __m128i pmi128_re,pmi128_im,mmtmpPMI0,mmtmpPMI1 /* ,mmtmpPMI2,mmtmpPMI3 */ ;
 
         dl_ch0_128    = (__m128i *)&ue->common_vars.common_vars_rx_data_per_thread[ue->current_thread_id[subframe]].dl_ch_estimates[eNB_id][aarx][4];
@@ -1229,7 +1229,7 @@ void lte_ue_measurements(PHY_VARS_UE *ue,
 
 
           // pmi
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
           pmi128_re = _mm_xor_si128(pmi128_re,pmi128_re);
           pmi128_im = _mm_xor_si128(pmi128_im,pmi128_im);
@@ -1247,7 +1247,7 @@ void lte_ue_measurements(PHY_VARS_UE *ue,
 
           for (i=0; i<limit; i++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
               mmtmpPMI0 = _mm_xor_si128(mmtmpPMI0,mmtmpPMI0);
               mmtmpPMI1 = _mm_xor_si128(mmtmpPMI1,mmtmpPMI1);
 
@@ -1370,7 +1370,7 @@ void lte_ue_measurements(PHY_VARS_UE *ue,
     // printf("in lte_ue_measurements: selected rx_antenna[eNB_id==0]:%u\n", ue->measurements.selected_rx_antennas[eNB_id][i]);
   }  // eNB_id loop
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

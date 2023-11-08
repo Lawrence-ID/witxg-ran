@@ -32,31 +32,52 @@
  * \date 2019
  * \version 0.2
 */
+#ifndef SIMDE_ENABLE_NATIVE_ALIASES
+#define SIMDE_ENABLE_NATIVE_ALIASES
+
+#ifndef __SSE2__
+#define __SSE2__
+#endif
+
+#ifndef __SSE3__
+#define __SSE3__
+#endif
+
+#ifndef __SSE4_1__
+#define __SSE4_1__
+#endif
+
+#ifndef __AVX2__
+#define __AVX2__
+#endif
+
+#include "PHY/simde-0.7.2/simde/x86/avx2.h"
+#endif
 
 #ifndef SSE_INTRIN_H
 #define SSE_INTRIN_H
 
 
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
+#ifndef SIMDE_ENABLE_NATIVE_ALIASES
+// #ifndef __SSE2__
+//   #  error SSE2 processor intrinsics disabled
+// #endif
 
-#ifndef __SSE2__
-  #  error SSE2 processor intrinsics disabled
-#endif
-
-#include <emmintrin.h>
-#include <xmmintrin.h>
+#include "PHY/simde-0.7.2/simde/x86/sse.h"  // SSE
+#include "PHY/simde-0.7.2/simde/x86/sse2.h" // SSE2
 
 #ifdef __SSE3__
-  #include <pmmintrin.h>
-  #include <tmmintrin.h>
+#include "PHY/simde-0.7.2/simde/x86/sse3.h"
+#include "PHY/simde-0.7.2/simde/x86/ssse3.h"
 #endif
 
 #ifdef __SSE4_1__
-  #include <smmintrin.h>
+#include "PHY/simde-0.7.2/simde/x86/sse4.1.h"
 #endif
 
 #ifdef __AVX2__
-  #include <immintrin.h>
+#include "PHY/simde-0.7.2/simde/x86/avx2.h"
 #endif
 
 // ------------------------------------------------
@@ -89,7 +110,7 @@ typedef union {
 #warning SSE3 instruction set not preset
 #define _mm_abs_epi16(xmmx) _mm_xor_si128((xmmx),_mm_cmpgt_epi16(_mm_setzero_si128(),(xmmx)))
 #define _mm_sign_epi16(xmmx,xmmy) _mm_xor_si128((xmmx),_mm_cmpgt_epi16(_mm_setzero_si128(),(xmmy)))
-#define _mm_hadd_epi32(xmmx,xmmy) _mm_unpacklo_epi64(_mm_add_epi32(_mm_shuffle_epi32((xmmx),_MM_SHUFFLE(0,2,0,2)),_mm_shuffle_epi32((xmmx),_MM_SHUFFLE(1,3,1,3))),_mm_add_epi32(_mm_shuffle_epi32((xmmy),_MM_SHUFFLE(0,2,0,2)),_mm_shuffle_epi32((xmmy),_MM_SHUFFLE(1,3,1,3))))
+#define _mm_hadd_epi32(xmmx, xmmy) _mm_unpacklo_epi64(_mm_add_epi32(_mm_shuffle_epi32((xmmx), _MM_SHUFFLE(0, 2, 0, 2)), _mm_shuffle_epi32((xmmx), _MM_SHUFFLE(1, 3, 1, 3))), _mm_add_epi32(_mm_shuffle_epi32((xmmy), _MM_SHUFFLE(0, 2, 0, 2)), _mm_shuffle_epi32((xmmy), _MM_SHUFFLE(1, 3, 1, 3))))
 
 // variant from lte_ul_channel_estimation.c and dlsch_demodulation.c and pmch.c
 //#define _mm_abs_epi16(xmmx) _mm_add_epi16(_mm_xor_si128((xmmx),_mm_cmpgt_epi16(_mm_setzero_si128(),(xmmx))),_mm_srli_epi16(_mm_cmpgt_epi16(_mm_setzero_si128(),(xmmx)),15))
@@ -330,13 +351,14 @@ static inline __m128i ssp_cvtepi16_epi32_SSE2 ( __m128i a) {
   return _mm_add_epi32(c, d);
 }
 #endif // __SSE4_1__
+#endif // SIMDE_ENABLE_NATIVE_ALIASES
 
 #elif defined(__arm__)
 #include <arm_neon.h>
 
 #endif // x86_64 || i386
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   #define vect128 __m128i
 #elif defined(__arm__)
   #define vect128 int16x8_t
@@ -345,7 +367,7 @@ static inline __m128i ssp_cvtepi16_epi32_SSE2 ( __m128i a) {
 static const short minusConjug128[8]__attribute__((aligned(16))) = {-1,1,-1,1,-1,1,-1,1};
 static inline vect128 mulByConjugate128(vect128 *a, vect128 *b, int8_t output_shift) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   vect128 realPart = _mm_madd_epi16(*a,*b);
   realPart = _mm_srai_epi32(realPart,output_shift);
   vect128 imagPart = _mm_shufflelo_epi16(*b,_MM_SHUFFLE(2,3,0,1));
@@ -361,7 +383,7 @@ static inline vect128 mulByConjugate128(vect128 *a, vect128 *b, int8_t output_sh
 #endif
 }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #define displaySamples128(vect)  {\
     __m128i x=vect;                                       \
     printf("vector: %s = (%hd,%hd) (%hd,%hd) (%hd,%hd) (%hd,%hd)\n", #vect, \

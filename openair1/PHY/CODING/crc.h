@@ -40,12 +40,9 @@
 #ifndef __CRC_H__
 #define __CRC_H__
 
-#include <x86intrin.h>
-
 #include "crcext.h"
 #include "types.h"
-#include <immintrin.h>
-#include <wmmintrin.h>
+#include "PHY/sse_intrin.h"
 
 /**
  * PCLMULQDQ CRC computation context structure

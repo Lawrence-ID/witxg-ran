@@ -278,7 +278,7 @@ int trx_eth_write_udp(openair0_device *device, openair0_timestamp timestamp, voi
 
   int nsamps2;  // aligned to upper 32 or 16 byte boundary
   
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
   nsamps2 = (nsamps+7)>>3;
   __m256i buff_tx[nsamps2+1];
@@ -299,7 +299,7 @@ int trx_eth_write_udp(openair0_device *device, openair0_timestamp timestamp, voi
     
     // bring TX data into 12 LSBs for softmodem RX
   for (int j=0; j<nsamps2; j++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     buff_tx2[j] = _mm256_slli_epi16(((__m256i *)buff)[j],4);
 #else
@@ -402,7 +402,7 @@ int trx_eth_read_udp(openair0_device *device, openair0_timestamp *timestamp, voi
   static int packet_cnt=0;
   int payload_size = UDP_PACKET_SIZE_BYTES(nsamps);
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     int nsamps2 = (payload_size>>5)+1;
   __m256i temp_rx[nsamps2];
@@ -478,7 +478,7 @@ int trx_eth_read_udp(openair0_device *device, openair0_timestamp *timestamp, voi
 #else
   // populate receive buffer in lower 12-bits from 16-bit representation
   for (int j=1; j<nsamps2; j++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
        ((__m256i *)buff)[j-1] = _mm256_srai_epi16(temp_rx[j],2);
 #else

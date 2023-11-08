@@ -55,11 +55,11 @@
 #include <sys/resource.h>
 
 #ifdef __SSE4_1__
-  #include <smmintrin.h>
+#include "PHY/sse_intrin.h"
 #endif
 
 #ifdef __AVX2__
-  #include <immintrin.h>
+#include "PHY/sse_intrin.h"
 #endif
 
 #ifdef __arm__
@@ -384,7 +384,7 @@ static int trx_usrp_write(openair0_device *device,
     }
 
   if(usrp_tx_thread == 0){
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   #ifdef __AVX2__
       nsamps2 = (nsamps+7)>>3;
       __m256i buff_tx[cc<2?2:cc][nsamps2];
@@ -402,7 +402,7 @@ static int trx_usrp_write(openair0_device *device,
     // bring RX data into 12 LSBs for softmodem RX
     for (int i=0; i<cc; i++) {
       for (int j=0; j<nsamps2; j++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
         buff_tx[i][j] = _mm256_slli_epi16(((__m256i *)buff[i])[j],4);
 #else
@@ -522,7 +522,7 @@ void *trx_usrp_write_thread(void * arg){
       LOG_W(HW,"count write = %d, start = %d, end = %d\n", write_thread->count_write, write_thread->start, write_thread->end);
     }*/
 
-    #if defined(__x86_64) || defined(__i386__)
+    #if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       #ifdef __AVX2__
         nsamps2 = (nsamps+7)>>3;
         __m256i buff_tx[cc<2?2:cc][nsamps2];
@@ -540,7 +540,7 @@ void *trx_usrp_write_thread(void * arg){
     // bring RX data into 12 LSBs for softmodem RX
     for (int i=0; i<cc; i++) {
       for (int j=0; j<nsamps2; j++) {
-        #if defined(__x86_64__) || defined(__i386__)
+        #if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
           #ifdef __AVX2__
             buff_tx[i][j] = _mm256_slli_epi16(((__m256i *)buff[i])[j],4);
           #else
@@ -624,7 +624,7 @@ static int trx_usrp_read(openair0_device *device, openair0_timestamp *ptimestamp
   usrp_state_t *s = (usrp_state_t *)device->priv;
   int samples_received=0;
   int nsamps2;  // aligned to upper 32 or 16 byte boundary
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
   nsamps2 = (nsamps+7)>>3;
   __m256i buff_tmp[cc<2 ? 2 : cc][nsamps2];
@@ -678,7 +678,7 @@ static int trx_usrp_read(openair0_device *device, openair0_timestamp *ptimestamp
     // bring RX data into 12 LSBs for softmodem RX
   for (int i=0; i<cc; i++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
 
       if ((((uintptr_t) buff[i])&0x1F)==0) {

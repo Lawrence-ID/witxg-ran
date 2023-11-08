@@ -660,7 +660,7 @@ void nr_dlsch_channel_compensation(int **rxdataF_ext,
                                 PHY_NR_MEASUREMENTS *measurements)
 {
 
-#if defined(__i386) || defined(__x86_64)
+#if defined(__i386) || defined(__x86_64) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   unsigned short rb;
   unsigned char aatx,aarx,atx;
@@ -1358,7 +1358,7 @@ void nr_dlsch_scale_channel(int **dl_ch_estimates_ext,
 			    unsigned short nb_rb)
 {
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
 
   short rb, ch_amp;
   unsigned char aatx,aarx;
@@ -1412,7 +1412,7 @@ void nr_dlsch_channel_level(int **dl_ch_estimates_ext,
 			    unsigned short nb_rb)
 {
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
 
   short rb;
   unsigned char aatx,aarx;
@@ -1518,7 +1518,7 @@ void nr_dlsch_channel_level_median(int **dl_ch_estimates_ext,
                                 int start_point)
 {
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
 
   short ii;
   int aatx,aarx;
@@ -1823,7 +1823,7 @@ void nr_dlsch_detection_mrc(int **rxdataF_comp,
                             unsigned char symbol,
                             unsigned short nb_rb,
                             int length) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   unsigned char aatx, aarx;
   int i;
   __m128i *rxdataF_comp128_0,*rxdataF_comp128_1,*dl_ch_mag128_0,*dl_ch_mag128_1,*dl_ch_mag128_0b,*dl_ch_mag128_1b,*dl_ch_mag128_0r,*dl_ch_mag128_1r;

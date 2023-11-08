@@ -73,7 +73,7 @@ int32_t lte_ul_channel_estimation(LTE_DL_FRAME_PARMS *frame_parms,
   //debug_msg("lte_ul_channel_estimation: cyclic shift %d\n",cyclicShift);
   int16_t alpha_re[12] = {32767, 28377, 16383,     0,-16384,  -28378,-32768,-28378,-16384,    -1, 16383, 28377};
   int16_t alpha_im[12] = {0,     16383, 28377, 32767, 28377,   16383,     0,-16384,-28378,-32768,-28378,-16384};
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxdataF128,*ul_ref128,*ul_ch128;
   __m128i mmtmpU0,mmtmpU1,mmtmpU2,mmtmpU3;
 #elif defined(__arm__)
@@ -116,7 +116,7 @@ int32_t lte_ul_channel_estimation(LTE_DL_FRAME_PARMS *frame_parms,
     symbol_offset = frame_parms->N_RB_UL*12*(l+((7-frame_parms->Ncp)*(Ns&1)));
 
     for (aa=0; aa<nb_antennas_rx; aa++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       rxdataF128 = (__m128i *)&rxdataF_ext[aa][symbol_offset];
       ul_ch128   = (__m128i *)&ul_ch_estimates[aa][symbol_offset];
       ul_ref128  = (__m128i *)ul_ref_sigs_rx[u][v][Msc_RS_idx];
@@ -127,7 +127,7 @@ int32_t lte_ul_channel_estimation(LTE_DL_FRAME_PARMS *frame_parms,
 #endif
 
       for (i=0; i<Msc_RS/12; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         // multiply by conjugated channel
         mmtmpU0 = _mm_madd_epi16(ul_ref128[0],rxdataF128[0]);
         // mmtmpU0 contains real part of 4 consecutive outputs (32-bit)
@@ -409,7 +409,7 @@ int32_t lte_ul_channel_estimation_RRU(LTE_DL_FRAME_PARMS *frame_parms,
   //debug_msg("lte_ul_channel_estimation_RRU: cyclic shift %d\n",cyclicShift);
   int16_t alpha_re[12] = {32767, 28377, 16383,     0,-16384,  -28378,-32768,-28378,-16384,    -1, 16383, 28377};
   int16_t alpha_im[12] = {0,     16383, 28377, 32767, 28377,   16383,     0,-16384,-28378,-32768,-28378,-16384};
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxdataF128,*ul_ref128,*ul_ch128;
   __m128i mmtmpU0,mmtmpU1,mmtmpU2,mmtmpU3;
 #elif defined(__arm__)
@@ -444,7 +444,7 @@ int32_t lte_ul_channel_estimation_RRU(LTE_DL_FRAME_PARMS *frame_parms,
   symbol_offset = frame_parms->N_RB_UL*12*l;
 
   for (aa=0; aa<nb_antennas_rx; aa++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     rxdataF128 = (__m128i *)&rxdataF_ext[aa][symbol_offset];
     ul_ch128   = (__m128i *)&ul_ch_estimates[aa][symbol_offset];
     ul_ref128  = (__m128i *)ul_ref_sigs_rx[u][v][Msc_RS_idx];
@@ -455,7 +455,7 @@ int32_t lte_ul_channel_estimation_RRU(LTE_DL_FRAME_PARMS *frame_parms,
 #endif
 
     for (i=0; i<Msc_RS/12; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       // multiply by conjugated channel
       mmtmpU0 = _mm_madd_epi16(ul_ref128[0],rxdataF128[0]);
       // mmtmpU0 contains real part of 4 consecutive outputs (32-bit)
@@ -777,7 +777,7 @@ int32_t lte_srs_channel_estimation(LTE_DL_FRAME_PARMS *frame_parms,
 int16_t lte_ul_freq_offset_estimation(LTE_DL_FRAME_PARMS *frame_parms,
                                       int32_t *ul_ch_estimates,
                                       uint16_t nb_rb) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   int k, rb;
   int a_idx = 64;
   uint8_t conj_flag = 0;

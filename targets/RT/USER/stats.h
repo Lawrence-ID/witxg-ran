@@ -24,7 +24,9 @@
 #ifndef _TARGETS_RT_USER_STATS_H_
 #define _TARGETS_RT_USER_STATS_H_
 
+#ifdef XFORMS
 #include <forms.h>
+#endif
 
 /* Callbacks, globals and object handlers */
 

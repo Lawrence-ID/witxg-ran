@@ -38,7 +38,7 @@ int32_t dot_product(int16_t *x,
 
   uint32_t n;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *x128,*y128,mmtmp1,mmtmp2,mmtmp3,mmcumul,mmcumul_re,mmcumul_im;
   __m64 mmtmp7;
   __m128i minus_i = _mm_set_epi16(-1,1,-1,1,-1,1,-1,1);
@@ -166,7 +166,7 @@ int64_t dot_product64(int16_t *x,
 {
   uint32_t n;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *x128,*y128,mmtmp1,mmtmp2,mmtmp3,mmcumul,mmcumul_re,mmcumul_im;
   __m128i minus_i = _mm_set_epi16(-1,1,-1,1,-1,1,-1,1);
   int64_t result;

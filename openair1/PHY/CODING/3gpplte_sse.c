@@ -45,7 +45,7 @@
 //#define DEBUG_TURBO_ENCODER 1
 //#define CALLGRIND 1
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 struct treillis {
   union {
     __m64 systematic_andp1_64[3];
@@ -126,7 +126,7 @@ static void treillis_table_init(void) {
 char interleave_compact_byte(short *base_interleaver,unsigned char *input, unsigned char *output, int n) {
   char expandInput[768*8] __attribute__((aligned(32)));
   int i,loop=n>>4;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
   __m128i *i_128=(__m128i *)input, *o_128=(__m128i *)expandInput;
   __m128i tmp1, tmp2, tmp3, tmp4;
@@ -223,7 +223,7 @@ char interleave_compact_byte(short *base_interleaver,unsigned char *input, unsig
     // int cur_byte=i<<3;
     // for (b=0;b<8;b++)
     //   expandInput[cur_byte+b] = (input[i]&(1<<(7-b)))>>(7-b);
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
     tmp1=_mm_load_si128(i_128++);       // tmp1 = B0,B1,...,B15
     tmp2=_mm_unpacklo_epi8(tmp1,tmp1);  // tmp2 = B0,B0,B1,B1,...,B7,B7
@@ -371,7 +371,7 @@ char interleave_compact_byte(short *base_interleaver,unsigned char *input, unsig
   }
 
   short *ptr_intl=base_interleaver;
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
   __m128i tmp={0};
   uint16_t *systematic2_ptr=(uint16_t *) output;
@@ -394,7 +394,7 @@ char interleave_compact_byte(short *base_interleaver,unsigned char *input, unsig
 #endif
 
   for ( i=0; i<  input_length_words ; i ++ ) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
     tmp=_mm_insert_epi8(tmp,expandInput[*ptr_intl++],7);
     tmp=_mm_insert_epi8(tmp,expandInput[*ptr_intl++],6);
@@ -512,7 +512,7 @@ void threegpplte_turbo_encoder_sse(unsigned char *input,
 
   unsigned char systematic2[768] __attribute__((aligned(32)));
   interleave_compact_byte(base_interleaver,input,systematic2,input_length_bytes);
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m64 *ptr_output=(__m64 *) output;
 #elif defined(__arm__)
   uint8x8_t *ptr_output=(uint8x8_t *)output;
@@ -525,7 +525,7 @@ void threegpplte_turbo_encoder_sse(unsigned char *input,
     cur_s2=systematic2[i];
 
     for ( code_rate=0; code_rate<3; code_rate++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       /*
        *ptr_output++ = _mm_add_pi8(all_treillis[state0][cur_s1].systematic_64[code_rate],
        _mm_add_pi8(all_treillis[state0][cur_s1].parity1_64[code_rate],
@@ -569,7 +569,7 @@ void threegpplte_turbo_encoder_sse(unsigned char *input,
 #ifdef DEBUG_TURBO_ENCODER
   printf("term: x0 %u, x1 %u, state1 %d\n",x[10],x[11],state1);
 #endif //DEBUG_TURBO_ENCODER
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

@@ -1,3 +1,4 @@
+#ifdef XFORMS
 #include <stdlib.h>
 #include <openair1/PHY/impl_defs_top.h>
 #include "executables/softmodem-common.h"
@@ -385,3 +386,4 @@ void CalibrationInitScope(void ** samplesRx,openair0_device *rfdevice) {
   tmp->rfdevice=rfdevice;
   threadCreate(&forms_thread, scopeThread, (void*) tmp, "scope", -1, OAI_PRIORITY_RT_LOW);
 }
+#endif

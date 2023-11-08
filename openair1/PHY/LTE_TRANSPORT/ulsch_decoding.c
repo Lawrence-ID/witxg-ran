@@ -625,7 +625,7 @@ unsigned int  ulsch_decoding(PHY_VARS_eNB *eNB,
       cseq[i2++] = (int16_t)((((s>>j)&1)<<1)-1);
     }
     */
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
     ((__m128i *)cseq)[i2++] = ((__m128i *)unscrambling_lut)[(s&65535)<<1];
     ((__m128i *)cseq)[i2++] = ((__m128i *)unscrambling_lut)[1+((s&65535)<<1)];
@@ -974,7 +974,7 @@ unsigned int  ulsch_decoding(PHY_VARS_eNB *eNB,
     }
 
     /* To be improved according to alignment of j2
-    #if defined(__x86_64__)||defined(__i386__)
+    #if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
     #ifndef __AVX2__
     for (iprime=0; iprime<G;iprime+=8,j2+=8)
       *((__m128i *)&ulsch_harq->e[iprime]) = *((__m128i *)&y[j2]);

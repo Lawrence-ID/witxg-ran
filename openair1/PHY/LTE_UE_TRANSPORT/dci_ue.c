@@ -353,7 +353,7 @@ void pdcch_channel_level(int32_t **dl_ch_estimates_ext,
 
   int16_t rb;
   uint8_t aatx,aarx;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *dl_ch128;
   __m128i avg128P;
 #elif defined(__arm__)
@@ -367,7 +367,7 @@ void pdcch_channel_level(int32_t **dl_ch_estimates_ext,
   for (aatx=0; aatx<frame_parms->nb_antenna_ports_eNB; aatx++)
     for (aarx=0; aarx<frame_parms->nb_antennas_rx; aarx++) {
       //clear average level
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       avg128P = _mm_setzero_si128();
       dl_ch128=(__m128i *)&dl_ch_estimates_ext[(aatx<<1)+aarx][0];
 #elif defined(__arm__)
@@ -379,7 +379,7 @@ void pdcch_channel_level(int32_t **dl_ch_estimates_ext,
 #endif
       for (rb=0; rb<nb_rb; rb++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         avg128P = _mm_add_epi32(avg128P,_mm_madd_epi16(dl_ch128[0],dl_ch128[0]));
         avg128P = _mm_add_epi32(avg128P,_mm_madd_epi16(dl_ch128[1],dl_ch128[1]));
         avg128P = _mm_add_epi32(avg128P,_mm_madd_epi16(dl_ch128[2],dl_ch128[2]));
@@ -406,7 +406,7 @@ void pdcch_channel_level(int32_t **dl_ch_estimates_ext,
       //      printf("Channel level : %d\n",avg[(aatx<<1)+aarx]);
     }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -425,7 +425,7 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
 
   uint8_t aatx;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxdataF_comp128_0,*rxdataF_comp128_1,*rxdataF_comp128_i0,*rxdataF_comp128_i1,*rho128_0,*rho128_1,*rho128_i0,*rho128_i1;
 #elif defined(__arm__)
   int16x8_t *rxdataF_comp128_0,*rxdataF_comp128_1,*rxdataF_comp128_i0,*rxdataF_comp128_i1,*rho128_0,*rho128_1,*rho128_i0,*rho128_i1;
@@ -438,7 +438,7 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
     for (aatx=0; aatx<frame_parms->nb_antenna_ports_eNB; aatx++) {
       //if (frame_parms->mode1_flag && (aatx>0)) break;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       rxdataF_comp128_0   = (__m128i *)&rxdataF_comp[(aatx<<1)][symbol*frame_parms->N_RB_DL*12];
       rxdataF_comp128_1   = (__m128i *)&rxdataF_comp[(aatx<<1)+1][symbol*frame_parms->N_RB_DL*12];
 #elif defined(__arm__)
@@ -449,7 +449,7 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
 #endif
       // MRC on each re of rb on MF output
       for (i=0; i<frame_parms->N_RB_DL*3; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         rxdataF_comp128_0[i] = _mm_adds_epi16(_mm_srai_epi16(rxdataF_comp128_0[i],1),_mm_srai_epi16(rxdataF_comp128_1[i],1));
 #elif defined(__arm__)
         rxdataF_comp128_0[i] = vhaddq_s16(rxdataF_comp128_0[i],rxdataF_comp128_1[i]);
@@ -457,7 +457,7 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
       }
     }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     rho128_0 = (__m128i *) &rho[0][symbol*frame_parms->N_RB_DL*12];
     rho128_1 = (__m128i *) &rho[1][symbol*frame_parms->N_RB_DL*12];
 #elif defined(__arm__)
@@ -465,14 +465,14 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
     rho128_1 = (int16x8_t *) &rho[1][symbol*frame_parms->N_RB_DL*12];
 #endif
     for (i=0; i<frame_parms->N_RB_DL*3; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       rho128_0[i] = _mm_adds_epi16(_mm_srai_epi16(rho128_0[i],1),_mm_srai_epi16(rho128_1[i],1));
 #elif defined(__arm__)
       rho128_0[i] = vhaddq_s16(rho128_0[i],rho128_1[i]);
 #endif
     }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     rho128_i0 = (__m128i *) &rho_i[0][symbol*frame_parms->N_RB_DL*12];
     rho128_i1 = (__m128i *) &rho_i[1][symbol*frame_parms->N_RB_DL*12];
     rxdataF_comp128_i0   = (__m128i *)&rxdataF_comp_i[0][symbol*frame_parms->N_RB_DL*12];
@@ -486,7 +486,7 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
 #endif
     // MRC on each re of rb on MF and rho
     for (i=0; i<frame_parms->N_RB_DL*3; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       rxdataF_comp128_i0[i] = _mm_adds_epi16(_mm_srai_epi16(rxdataF_comp128_i0[i],1),_mm_srai_epi16(rxdataF_comp128_i1[i],1));
       rho128_i0[i]          = _mm_adds_epi16(_mm_srai_epi16(rho128_i0[i],1),_mm_srai_epi16(rho128_i1[i],1));
 #elif defined(__arm__)
@@ -497,7 +497,7 @@ void pdcch_detection_mrc_i(LTE_DL_FRAME_PARMS *frame_parms,
     }
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -985,7 +985,7 @@ void pdcch_channel_compensation(int32_t **rxdataF_ext,
 
   uint16_t rb;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *dl_ch128,*rxdataF128,*rxdataF_comp128;
   __m128i *dl_ch128_2, *rho128;
   __m128i mmtmpPD0,mmtmpPD1,mmtmpPD2,mmtmpPD3;
@@ -1009,7 +1009,7 @@ void pdcch_channel_compensation(int32_t **rxdataF_ext,
 
     for (aarx=0; aarx<frame_parms->nb_antennas_rx; aarx++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       dl_ch128          = (__m128i *)&dl_ch_estimates_ext[(aatx<<1)+aarx][symbol*frame_parms->N_RB_DL*12];
       rxdataF128        = (__m128i *)&rxdataF_ext[aarx][symbol*frame_parms->N_RB_DL*12];
       rxdataF_comp128   = (__m128i *)&rxdataF_comp[(aatx<<1)+aarx][symbol*frame_parms->N_RB_DL*12];
@@ -1020,7 +1020,7 @@ void pdcch_channel_compensation(int32_t **rxdataF_ext,
 
       for (rb=0; rb<frame_parms->N_RB_DL; rb++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         // multiply by conjugated channel
         mmtmpPD0 = _mm_madd_epi16(dl_ch128[0],rxdataF128[0]);
         //  print_ints("re",&mmtmpPD0);
@@ -1105,7 +1105,7 @@ void pdcch_channel_compensation(int32_t **rxdataF_ext,
 
     for (aarx=0; aarx<frame_parms->nb_antennas_rx; aarx++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       rho128        = (__m128i *)&rho[aarx][symbol*frame_parms->N_RB_DL*12];
       dl_ch128      = (__m128i *)&dl_ch_estimates_ext[aarx][symbol*frame_parms->N_RB_DL*12];
       dl_ch128_2    = (__m128i *)&dl_ch_estimates_ext[2+aarx][symbol*frame_parms->N_RB_DL*12];
@@ -1114,7 +1114,7 @@ void pdcch_channel_compensation(int32_t **rxdataF_ext,
 
 #endif
       for (rb=0; rb<frame_parms->N_RB_DL; rb++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
         // multiply by conjugated channel
         mmtmpPD0 = _mm_madd_epi16(dl_ch128[0],dl_ch128_2[0]);
@@ -1190,7 +1190,7 @@ void pdcch_channel_compensation(int32_t **rxdataF_ext,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -1203,7 +1203,7 @@ void pdcch_detection_mrc(LTE_DL_FRAME_PARMS *frame_parms,
 
   uint8_t aatx;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxdataF_comp128_0,*rxdataF_comp128_1;
 #elif defined(__arm__)
  int16x8_t *rxdataF_comp128_0,*rxdataF_comp128_1;
@@ -1212,7 +1212,7 @@ void pdcch_detection_mrc(LTE_DL_FRAME_PARMS *frame_parms,
 
   if (frame_parms->nb_antennas_rx>1) {
     for (aatx=0; aatx<frame_parms->nb_antenna_ports_eNB; aatx++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       rxdataF_comp128_0   = (__m128i *)&rxdataF_comp[(aatx<<1)][symbol*frame_parms->N_RB_DL*12];
       rxdataF_comp128_1   = (__m128i *)&rxdataF_comp[(aatx<<1)+1][symbol*frame_parms->N_RB_DL*12];
 #elif defined(__arm__)
@@ -1221,7 +1221,7 @@ void pdcch_detection_mrc(LTE_DL_FRAME_PARMS *frame_parms,
 #endif
       // MRC on each re of rb
       for (i=0; i<frame_parms->N_RB_DL*3; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         rxdataF_comp128_0[i] = _mm_adds_epi16(_mm_srai_epi16(rxdataF_comp128_0[i],1),_mm_srai_epi16(rxdataF_comp128_1[i],1));
 #elif defined(__arm__)
         rxdataF_comp128_0[i] = vhaddq_s16(rxdataF_comp128_0[i],rxdataF_comp128_1[i]);
@@ -1230,7 +1230,7 @@ void pdcch_detection_mrc(LTE_DL_FRAME_PARMS *frame_parms,
     }
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

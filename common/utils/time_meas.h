@@ -37,7 +37,7 @@ extern double cpu_freq_GHz  __attribute__ ((aligned(32)));;
 // structure to store data to compute cpu measurment
 #if defined(__x86_64__) || defined(__i386__)
   typedef long long oai_cputime_t;
-#elif defined(__arm__)
+#elif defined(__arm__)  || defined(__riscv)
   typedef uint32_t oai_cputime_t;
 #else
   #error "building on unsupported CPU architecture"
@@ -105,6 +105,7 @@ static inline unsigned long long rdtsc_oai(void) {
   unsigned long long a, d;
   __asm__ volatile ("rdtsc" : "=a" (a), "=d" (d));
   return (d<<32) | a;
+  return 0;
 }
 
 #elif defined(__arm__)
@@ -113,6 +114,11 @@ static inline uint32_t rdtsc_oai(void) {
   uint32_t r = 0;
   asm volatile("mrc p15, 0, %0, c9, c13, 0" : "=r"(r) );
   return r;
+}
+#elif defined(__riscv)
+static inline uint32_t rdtsc_oai(void)
+{
+  return 0;
 }
 #endif
 

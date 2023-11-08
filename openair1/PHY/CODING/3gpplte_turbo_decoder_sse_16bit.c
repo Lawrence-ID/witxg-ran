@@ -116,7 +116,7 @@ void log_map16(llr_t *systematic,
 void compute_gamma16(llr_t *m11,llr_t *m10,llr_t *systematic,channel_t *y_parity,
                      unsigned short frame_length,unsigned char term_flag) {
   int k,K1;
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *systematic128 = (__m128i *)systematic;
   __m128i *y_parity128   = (__m128i *)y_parity;
   __m128i *m10_128        = (__m128i *)m10;
@@ -142,7 +142,7 @@ void compute_gamma16(llr_t *m11,llr_t *m10,llr_t *systematic,channel_t *y_parity
 #endif
 
   for (k=0; k<K1; k++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
     m11_128[k] = _mm_srai_epi16(_mm_adds_epi16(systematic128[k],y_parity128[k]),1);
     m10_128[k] = _mm_srai_epi16(_mm_subs_epi16(systematic128[k],y_parity128[k]),1);
@@ -166,7 +166,7 @@ void compute_gamma16(llr_t *m11,llr_t *m10,llr_t *systematic,channel_t *y_parity
 
   k=frame_length>>3;
   // Termination
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   m11_128[k] = _mm_srai_epi16(_mm_adds_epi16(systematic128[k+term_flag],y_parity128[k]),1);
   //#ifndef __AVX2__
 #if 1
@@ -191,7 +191,7 @@ void compute_gamma16(llr_t *m11,llr_t *m10,llr_t *systematic,channel_t *y_parity
 
 void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned short frame_length,unsigned char F) {
   int k,l,l2,K1,rerun_flag=0;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *alpha128=(__m128i *)alpha,*alpha_ptr,*m11p,*m10p;
   //#ifndef __AVX2__
 #if 1
@@ -220,7 +220,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
 #endif
 
   for (l=K1;; l=l2,rerun_flag=1) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     alpha128 = (__m128i *)alpha;
     //#ifdef __AVX2__
 #elif defined(__arm__)
@@ -228,7 +228,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
 #endif
 
     if (rerun_flag == 0) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       alpha128[0] = _mm_set_epi16(-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,0);
       alpha128[1] = _mm_set_epi16(-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2);
       alpha128[2] = _mm_set_epi16(-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2,-MAX/2);
@@ -261,7 +261,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
 #endif
     } else {
       //set initial alpha in columns 1-7 from final alpha from last run in columns 0-6
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       alpha128[0] = _mm_slli_si128(alpha128[frame_length],2);
       alpha128[1] = _mm_slli_si128(alpha128[1+frame_length],2);
       alpha128[2] = _mm_slli_si128(alpha128[2+frame_length],2);
@@ -311,7 +311,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
 
     alpha_ptr = &alpha128[0];
     //#ifdef __AVX2__
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     m11p = (__m128i *)m_11;
     m10p = (__m128i *)m_10;
 #elif defined(__arm__)
@@ -322,7 +322,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
     for (k=0;
          k<l;
          k++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       //#ifndef __AVX2__
 #if 1
       a1=_mm_load_si128(&alpha_ptr[1]);
@@ -426,7 +426,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
       //#ifdef __AVX2__
       m11p++;
       m10p++;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       //#ifndef __AVX2__
 #if 1
       alpha_ptr[0] = _mm_subs_epi16(a0,alpha_max);
@@ -505,7 +505,7 @@ void compute_alpha16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned s
 
 void compute_beta16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned short frame_length,unsigned char F,int offset8_flag) {
   int k,rerun_flag=0;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i m11_128,m10_128;
   __m128i m_b0,m_b1,m_b2,m_b3,m_b4,m_b5,m_b6,m_b7;
   __m128i new0,new1,new2,new3,new4,new5,new6,new7;
@@ -577,7 +577,7 @@ void compute_beta16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned sh
   beta7_16=beta7_16-beta_m;
 
   for (rerun_flag=0;; rerun_flag=1) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     beta_ptr   = (__m128i *)&beta[frame_length<<3];
     alpha128   = (__m128i *)&alpha[0];
 #elif defined(__arm__)
@@ -606,7 +606,7 @@ void compute_beta16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned sh
       print_shorts("b7",(int16_t *)&beta_ptr[7]);
 #endif
     } else {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       beta128 = (__m128i *)&beta[0];
       beta_ptr[0] = _mm_srli_si128(beta128[0],2);
       beta_ptr[1] = _mm_srli_si128(beta128[1],2);
@@ -649,7 +649,7 @@ void compute_beta16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned sh
 #endif
     }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     beta_ptr[0] = _mm_insert_epi16(beta_ptr[0],beta0_16,7);
     beta_ptr[1] = _mm_insert_epi16(beta_ptr[1],beta1_16,7);
     beta_ptr[2] = _mm_insert_epi16(beta_ptr[2],beta2_16,7);
@@ -682,7 +682,7 @@ void compute_beta16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned sh
     int loopval=((rerun_flag==0)?0:((frame_length-L)>>3));
 
     for (k=(frame_length>>3)-1; k>=loopval; k--) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       m11_128=((__m128i *)m_11)[k];
       m10_128=((__m128i *)m_10)[k];
       //#ifndef __AVX2__
@@ -827,7 +827,7 @@ void compute_beta16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,unsigned sh
 }
 
 void compute_ext16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,llr_t *ext, llr_t *systematic,unsigned short frame_length) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *alpha128=(__m128i *)alpha;
   __m128i *beta128=(__m128i *)beta;
   __m128i *m11_128,*m10_128,*ext_128;
@@ -857,7 +857,7 @@ void compute_ext16(llr_t *alpha,llr_t *beta,llr_t *m_11,llr_t *m_10,llr_t *ext, 
   beta_ptr = &beta128[8];
 
   for (k=0; k<(frame_length>>3); k++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     m11_128        = (__m128i *)&m_11[k<<3];
     m10_128        = (__m128i *)&m_10[k<<3];
     ext_128        = (__m128i *)&ext[k<<3];
@@ -1103,7 +1103,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
   unsigned char iteration_cnt=0;
   unsigned int crc,oldcrc,crc_len;
   uint8_t temp;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *yp128;
   __m128i tmp={0}, zeros=_mm_setzero_si128();
   __m128i tmpe;
@@ -1153,7 +1153,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
       crc_len=3;
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   yp128 = (__m128i *)y;
 #elif defined(__arm__)
   yp128 = (int16x8_t *)y;
@@ -1167,7 +1167,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
   for (i=0; i<n; i+=8) {
     pi2_p = &pi2tab16[iind][i];
     j=pi2_p[0];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     tmpe = _mm_load_si128(yp128);
     //    fprintf(fdsse4,"yp128 %p\n",yp128);
     //    print_shorts("tmpe",(int16_t *)&tmpe);
@@ -1306,7 +1306,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
     pi4_p=pi4tab16[iind];
 
     for (i=0; i<(n>>3); i++) { // steady-state portion
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       ((__m128i *)systematic2)[i]=_mm_insert_epi16(((__m128i *)systematic2)[i],ext[*pi4_p++],0);
       ((__m128i *)systematic2)[i]=_mm_insert_epi16(((__m128i *)systematic2)[i],ext[*pi4_p++],1);
       ((__m128i *)systematic2)[i]=_mm_insert_epi16(((__m128i *)systematic2)[i],ext[*pi4_p++],2);
@@ -1336,7 +1336,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
     pi5_p=pi5tab16[iind];
 
     for (i=0; i<(n>>3); i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       tmp=_mm_insert_epi16(tmp,ext2[*pi5_p++],0);
       tmp=_mm_insert_epi16(tmp,ext2[*pi5_p++],1);
       tmp=_mm_insert_epi16(tmp,ext2[*pi5_p++],2);
@@ -1367,7 +1367,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
       pi6_p=pi6tab16[iind];
 
       for (i=0; i<(n>>3); i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         tmp=_mm_insert_epi16(tmp, ((llr_t *)ext2)[*pi6_p++],7);
         tmp=_mm_insert_epi16(tmp, ((llr_t *)ext2)[*pi6_p++],6);
         tmp=_mm_insert_epi16(tmp, ((llr_t *)ext2)[*pi6_p++],5);
@@ -1460,7 +1460,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
     // do log_map from first parity bit
     if (iteration_cnt < max_iterations) {
       log_map16(systematic1,yparity1,m11,m10,alpha,beta,ext,n,0,F,offset8_flag,alpha_stats,beta_stats,gamma_stats,ext_stats);
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       __m128i *ext_128=(__m128i *) ext;
       __m128i *s1_128=(__m128i *) systematic1;
       __m128i *s0_128=(__m128i *) systematic0;
@@ -1472,7 +1472,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
       int myloop=n>>3;
 
       for (i=0; i<myloop; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
         *ext_128=_mm_adds_epi16(_mm_subs_epi16(*ext_128,*s1_128++),*s0_128++);
 #elif defined(__arm__)
         *ext_128=vqaddq_s16(vqsubq_s16(*ext_128,*s1_128++),*s0_128++);
@@ -1486,7 +1486,7 @@ uint8_t phy_threegpplte_turbo_decoder16(int16_t *y,
 #ifdef DEBUG_LOGMAP
   fclose(fdsse4);
 #endif
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

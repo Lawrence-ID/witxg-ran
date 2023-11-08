@@ -33,7 +33,7 @@
 #ifndef __CRCEXT_H__
 #define __CRCEXT_H__
 
-#include <x86intrin.h>
+#include "PHY/sse_intrin.h"
 #include "types.h"
 /**
  * Flag indicating availability of PCLMULQDQ instruction

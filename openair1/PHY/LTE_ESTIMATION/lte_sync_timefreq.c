@@ -39,14 +39,14 @@
 #include "PHY/defs_UE.h"
 #include "PHY/phy_extern_ue.h"
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #include "pss6144.h"
 extern void print_shorts(char*,__m128i*);
 #endif
 
 void lte_sync_timefreq(PHY_VARS_UE *ue,int band,unsigned int DL_freq)
 {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   UE_SCAN_INFO_t *scan_info = &ue->scan_info[band];
   int16_t spectrum[12288] __attribute__((aligned(32)));
   int16_t spectrum_p5ms[12288] __attribute__((aligned(32)));

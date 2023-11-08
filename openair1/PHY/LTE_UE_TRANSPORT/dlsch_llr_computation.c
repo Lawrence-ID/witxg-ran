@@ -43,7 +43,7 @@
 
 int16_t zeros[8] __attribute__ ((aligned(16))) = {0,0,0,0,0,0,0,0};
 int16_t ones[8] __attribute__ ((aligned(16))) = {0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff};
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i rho_rpi __attribute__ ((aligned(16)));
 __m128i rho_rmi __attribute__ ((aligned(16)));
 __m128i rho_rpi_1_1 __attribute__ ((aligned(16)));
@@ -881,7 +881,7 @@ void qam16_llr(int16_t *stream0_in,
                int length)
 {
   int i;
-  #if defined(__x86_64__) || defined(__i386__)
+  #if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxF_128 = (__m128i*)stream0_in;
   __m128i *ch_mag_128 = (__m128i*)chan_magn;
   __m128i llr128[2];
@@ -896,7 +896,7 @@ void qam16_llr(int16_t *stream0_in,
  // printf ("This line in qam16_llr is %d.\n", __LINE__);
 
   for (i=0; i<length; i++) {
-#if defined(__x86_64__) || defined(__i386)
+#if defined(__x86_64__) || defined(__i386) || defined SIMDE_ENABLE_NATIVE_ALIASES
    xmm0 = _mm_abs_epi16(rxF_128[i]);
    xmm0 = _mm_subs_epi16(ch_mag_128[i],xmm0);
 
@@ -939,7 +939,7 @@ void qam16_llr(int16_t *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386)
+#if defined(__x86_64__) || defined(__i386) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -1135,7 +1135,7 @@ void qam64_llr(int16_t *stream0_in,
                int length)
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxF_128 = (__m128i*)stream0_in;
   __m128i *ch_mag_128 = (__m128i*)chan_magn;
   __m128i *ch_magb_128 = (__m128i*)chan_magn_b;
@@ -1153,7 +1153,7 @@ void qam64_llr(int16_t *stream0_in,
 
   for (i=0; i<length; i++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm1 = _mm_abs_epi16(rxF_128[i]);
     xmm1 = _mm_subs_epi16(ch_mag_128[i],xmm1);
     xmm2 = _mm_abs_epi16(xmm1);
@@ -1179,7 +1179,7 @@ void qam64_llr(int16_t *stream0_in,
     */
     llr[0] = ((short *)&rxF_128[i])[0];
     llr[1] = ((short *)&rxF_128[i])[1];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr[2] = _mm_extract_epi16(xmm1,0);
     llr[3] = _mm_extract_epi16(xmm1,1);//((short *)&xmm1)[j+1];
     llr[4] = _mm_extract_epi16(xmm2,0);//((short *)&xmm2)[j];
@@ -1194,7 +1194,7 @@ void qam64_llr(int16_t *stream0_in,
     llr+=6;
     llr[0] = ((short *)&rxF_128[i])[2];
     llr[1] = ((short *)&rxF_128[i])[3];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr[2] = _mm_extract_epi16(xmm1,2);
     llr[3] = _mm_extract_epi16(xmm1,3);//((short *)&xmm1)[j+1];
     llr[4] = _mm_extract_epi16(xmm2,2);//((short *)&xmm2)[j];
@@ -1209,7 +1209,7 @@ void qam64_llr(int16_t *stream0_in,
     llr+=6;
     llr[0] = ((short *)&rxF_128[i])[4];
     llr[1] = ((short *)&rxF_128[i])[5];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr[2] = _mm_extract_epi16(xmm1,4);
     llr[3] = _mm_extract_epi16(xmm1,5);//((short *)&xmm1)[j+1];
     llr[4] = _mm_extract_epi16(xmm2,4);//((short *)&xmm2)[j];
@@ -1223,7 +1223,7 @@ void qam64_llr(int16_t *stream0_in,
     llr+=6;
     llr[0] = ((short *)&rxF_128[i])[6];
     llr[1] = ((short *)&rxF_128[i])[7];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr[2] = _mm_extract_epi16(xmm1,6);
     llr[3] = _mm_extract_epi16(xmm1,7);//((short *)&xmm1)[j+1];
     llr[4] = _mm_extract_epi16(xmm2,6);//((short *)&xmm2)[j];
@@ -1238,7 +1238,7 @@ void qam64_llr(int16_t *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -1402,7 +1402,7 @@ void dlsch_64qam_llr_SIC(LTE_DL_FRAME_PARMS *frame_parms,
 // QPSK
 //----------------------------------------------------------------------------------------------
 
-#if defined(__x86_64__) || defined(__i386)
+#if defined(__x86_64__) || defined(__i386) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i  y0r_over2 __attribute__ ((aligned(16)));
 __m128i  y0i_over2 __attribute__ ((aligned(16)));
 __m128i  y1r_over2 __attribute__ ((aligned(16)));
@@ -1494,7 +1494,7 @@ void qpsk_qpsk(short *stream0_in,
     length = number of resource elements
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -1513,7 +1513,7 @@ void qpsk_qpsk(short *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
     // in each iteration, we take 8 complex samples
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = rho01_128i[i]; // 4 symbols
     xmm1 = rho01_128i[i+1];
 
@@ -1543,7 +1543,7 @@ void qpsk_qpsk(short *stream0_in,
     // Compute LLR for first bit of stream 0
 
     // Compute real and imaginary parts of MF output for stream 0
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = stream0_128i_in[i];
     xmm1 = stream0_128i_in[i+1];
 
@@ -1565,7 +1565,7 @@ void qpsk_qpsk(short *stream0_in,
 
 #endif
     // Compute real and imaginary parts of MF output for stream 1
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = stream1_128i_in[i];
     xmm1 = stream1_128i_in[i+1];
 
@@ -1660,7 +1660,7 @@ void qpsk_qpsk(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -1723,7 +1723,7 @@ int dlsch_qpsk_16qam_llr(LTE_DL_FRAME_PARMS *frame_parms,
 }
 
 /*
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i ONE_OVER_SQRT_2 __attribute__((aligned(16)));
 __m128i ONE_OVER_SQRT_10 __attribute__((aligned(16)));
 __m128i THREE_OVER_SQRT_10 __attribute__((aligned(16)));
@@ -1751,7 +1751,7 @@ void qpsk_qam16(int16_t *stream0_in,
     length = number of resource elements
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -1785,7 +1785,7 @@ void qpsk_qam16(int16_t *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // in each iteration, we take 8 complex samples
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     xmm0 = rho01_128i[i]; // 4 symbols
     xmm1 = rho01_128i[i+1];
@@ -1942,7 +1942,7 @@ void qpsk_qam16(int16_t *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -2034,7 +2034,7 @@ void qpsk_qam64(short *stream0_in,
     length = number of resource elements
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -2064,7 +2064,7 @@ void qpsk_qam64(short *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // in each iteration, we take 8 complex samples
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     xmm0 = rho01_128i[i]; // 4 symbols
     xmm1 = rho01_128i[i+1];
@@ -2240,7 +2240,7 @@ void qpsk_qam64(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -2290,7 +2290,7 @@ void qam16_qpsk(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i       = (__m128i *)rho01;
   __m128i *stream0_128i_in  = (__m128i *)stream0_in;
   __m128i *stream1_128i_in  = (__m128i *)stream1_in;
@@ -2321,7 +2321,7 @@ void qam16_qpsk(short *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // In one iteration, we deal with 8 REs
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -2707,7 +2707,7 @@ void qam16_qpsk(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -2796,7 +2796,7 @@ void qam16_qam16(short *stream0_in,
     Output:
     stream0_out: output LLRs for 1st stream
   */
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i       = (__m128i *)rho01;
   __m128i *stream0_128i_in  = (__m128i *)stream0_in;
   __m128i *stream1_128i_in  = (__m128i *)stream1_in;
@@ -2829,7 +2829,7 @@ void qam16_qam16(short *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // In one iteration, we deal with 8 REs
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -3260,7 +3260,7 @@ void qam16_qam16(short *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -3353,7 +3353,7 @@ void qam16_qam64(int16_t *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i       = (__m128i *)rho01;
   __m128i *stream0_128i_in  = (__m128i *)stream0_in;
   __m128i *stream1_128i_in  = (__m128i *)stream1_in;
@@ -3393,7 +3393,7 @@ void qam16_qam64(int16_t *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // In one iteration, we deal with 8 REs
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -3893,7 +3893,7 @@ void qam16_qam64(int16_t *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -4027,7 +4027,7 @@ void qam64_qpsk(int16_t *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i      = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -4076,7 +4076,7 @@ void qam64_qpsk(int16_t *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
 
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -5458,7 +5458,7 @@ void qam64_qpsk(int16_t *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -5547,7 +5547,7 @@ void qam64_qam16(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m128i *rho01_128i      = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
@@ -5602,7 +5602,7 @@ void qam64_qam16(short *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -6998,7 +6998,7 @@ void qam64_qam16(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -7089,7 +7089,7 @@ void qam64_qam64(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m128i *rho01_128i      = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
@@ -7148,7 +7148,7 @@ void qam64_qam64(short *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     // Get rho
     xmm0 = rho01_128i[i];
@@ -8809,7 +8809,7 @@ void qam64_qam64(short *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

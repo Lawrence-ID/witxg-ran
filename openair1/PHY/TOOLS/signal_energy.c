@@ -31,7 +31,7 @@
 //#define shift_DC 0
 #define SHRT_MIN -32768
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef LOCALIZATION
 int32_t subcarrier_energy(int32_t *input,uint32_t length, int32_t *subcarrier_energy, uint16_t rx_power_correction)
 {

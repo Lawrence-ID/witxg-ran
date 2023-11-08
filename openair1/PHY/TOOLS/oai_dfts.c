@@ -68,7 +68,7 @@ const static int16_t reflip[32]  __attribute__((aligned(32))) = {1,-1,1,-1,1,-1,
 
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void cmac(__m128i a,__m128i b, __m128i *re32, __m128i *im32) __attribute__((always_inline));
 static inline void cmac(__m128i a,__m128i b, __m128i *re32, __m128i *im32)
 {
@@ -489,7 +489,7 @@ const static int16_t W25s[16]__attribute__((aligned(32))) = {-26509,-19260,-2650
 const static int16_t W35s[16]__attribute__((aligned(32))) = {-26510,19260,-26510,19260,-26510,19260,-26510,19260,-26510,19260,-26510,19260,-26510,19260,-26510,19260};
 const static int16_t W45s[16]__attribute__((aligned(32))) = {10126,31163,10126,31163,10126,31163,10126,31163,10126,31163,10126,31163,10126,31163,10126,31163};
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 const __m128i *W0 = (__m128i *)W0s;
 const __m128i *W13 = (__m128i *)W13s;
 const __m128i *W23 = (__m128i *)W23s;
@@ -536,7 +536,7 @@ const static int16_t dft_norm_table[16] = {9459,  //12
 }; //sqrt(5) //300
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly2(__m128i *x0, __m128i *x1,__m128i *y0, __m128i *y1,__m128i *tw)__attribute__((always_inline));
 
 static inline void bfly2(__m128i *x0, __m128i *x1,__m128i *y0, __m128i *y1,__m128i *tw)
@@ -617,7 +617,7 @@ static inline void bfly2(int16x8_t *x0, int16x8_t *x1,int16x8_t *y0, int16x8_t *
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly2_tw1(__m128i *x0, __m128i *x1, __m128i *y0, __m128i *y1)__attribute__((always_inline));
 
 static inline void bfly2_tw1(__m128i *x0, __m128i *x1, __m128i *y0, __m128i *y1)
@@ -641,7 +641,7 @@ static inline void bfly2_tw1(int16x8_t *x0, int16x8_t *x1, int16x8_t *y0, int16x
 }
 #endif
  
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
 
 
@@ -705,7 +705,7 @@ static inline void bfly2_16(int16x8_t *x0, int16x8_t *x1, int16x8_t *y0, int16x8
 }
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void ibfly2(__m128i *x0, __m128i *x1,__m128i *y0, __m128i *y1,__m128i *tw)__attribute__((always_inline));
 
 static inline void ibfly2(__m128i *x0, __m128i *x1,__m128i *y0, __m128i *y1,__m128i *tw)
@@ -786,7 +786,7 @@ static inline void ibfly2(int16x8_t *x0, int16x8_t *x1,int16x8_t *y0, int16x8_t 
 
 // This is the radix-3 butterfly (fft)
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
 static inline void bfly3(__m128i *x0,__m128i *x1,__m128i *x2,
                          __m128i *y0,__m128i *y1,__m128i *y2,
@@ -867,7 +867,7 @@ static inline void bfly3(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void ibfly3(__m128i *x0,__m128i *x1,__m128i *x2,
 			  __m128i *y0,__m128i *y1,__m128i *y2,
 			  __m128i *tw1,__m128i *tw2) __attribute__((always_inline));
@@ -946,7 +946,7 @@ static inline void ibfly3(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,
 }
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly3_tw1(__m128i *x0,__m128i *x1,__m128i *x2,
                              __m128i *y0,__m128i *y1,__m128i *y2) __attribute__((always_inline));
 
@@ -1014,7 +1014,7 @@ static inline void bfly3_tw1(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly4(__m128i *x0,__m128i *x1,__m128i *x2,__m128i *x3,
                          __m128i *y0,__m128i *y1,__m128i *y2,__m128i *y3,
                          __m128i *tw1,__m128i *tw2,__m128i *tw3)__attribute__((always_inline));
@@ -1142,7 +1142,7 @@ static inline void bfly4(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,int16x8_t *x3
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void ibfly4(__m128i *x0,__m128i *x1,__m128i *x2,__m128i *x3,
                           __m128i *y0,__m128i *y1,__m128i *y2,__m128i *y3,
                           __m128i *tw1,__m128i *tw2,__m128i *tw3)__attribute__((always_inline));
@@ -1240,7 +1240,7 @@ static inline void ibfly4(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,int16x8_t *x
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
 static inline void bfly4_tw1(__m128i *x0,__m128i *x1,__m128i *x2,__m128i *x3,
                              __m128i *y0,__m128i *y1,__m128i *y2,__m128i *y3)__attribute__((always_inline));
@@ -1323,7 +1323,7 @@ static inline void bfly4_tw1(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,int16x8_t
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
 static inline void ibfly4_tw1(__m128i *x0,__m128i *x1,__m128i *x2,__m128i *x3,
                               __m128i *y0,__m128i *y1,__m128i *y2,__m128i *y3)__attribute__((always_inline));
@@ -1370,7 +1370,7 @@ static inline void ibfly4_tw1(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,int16x8_
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly4_16(__m128i *x0,__m128i *x1,__m128i *x2,__m128i *x3,
                             __m128i *y0,__m128i *y1,__m128i *y2,__m128i *y3,
                             __m128i *tw1,__m128i *tw2,__m128i *tw3,
@@ -1496,7 +1496,7 @@ static inline void bfly4_16(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,int16x8_t 
 }
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void ibfly4_16(__m128i *x0,__m128i *x1,__m128i *x2,__m128i *x3,
                              __m128i *y0,__m128i *y1,__m128i *y2,__m128i *y3,
                              __m128i *tw1,__m128i *tw2,__m128i *tw3,
@@ -1619,7 +1619,7 @@ static inline void ibfly4_16(int16x8_t *x0,int16x8_t *x1,int16x8_t *x2,int16x8_t
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly5(__m128i *x0, __m128i *x1, __m128i *x2, __m128i *x3,__m128i *x4,
                          __m128i *y0, __m128i *y1, __m128i *y2, __m128i *y3,__m128i *y4,
                          __m128i *tw1,__m128i *tw2,__m128i *tw3,__m128i *tw4)__attribute__((always_inline));
@@ -1778,7 +1778,7 @@ static inline void bfly5(int16x8_t *x0, int16x8_t *x1, int16x8_t *x2, int16x8_t 
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void bfly5_tw1(__m128i *x0, __m128i *x1, __m128i *x2, __m128i *x3,__m128i *x4,
                              __m128i *y0, __m128i *y1, __m128i *y2, __m128i *y3,__m128i *y4) __attribute__((always_inline));
 
@@ -1893,7 +1893,7 @@ static inline void bfly5_tw1(int16x8_t *x0, int16x8_t *x1, int16x8_t *x2, int16x
 // performs 4x4 transpose of input x (complex interleaved) using 128bit SIMD intrinsics
 // i.e. x = [x0r x0i x1r x1i ... x15r x15i], y = [x0r x0i x4r x4i x8r x8i x12r x12i x1r x1i x5r x5i x9r x9i x13r x13i x2r x2i ... x15r x15i]
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void transpose16(__m128i *x,__m128i *y) __attribute__((always_inline));
 static inline void transpose16(__m128i *x,__m128i *y)
 {
@@ -1926,7 +1926,7 @@ static inline void transpose16(int16x8_t *x,int16x8_t *y)
 
 # endif
 // same as above but output is offset by off
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 static inline void transpose16_ooff(__m128i *x,__m128i *y,int off) __attribute__((always_inline));
 
 static inline void transpose16_ooff(__m128i *x,__m128i *y,int off)
@@ -1996,7 +1996,7 @@ static inline void transpose16_ooff(int16x8_t *x,int16x8_t *y,int off)
 
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
 static inline void transpose4_ooff(__m64 *x,__m64 *y,int off)__attribute__((always_inline));
 static inline void transpose4_ooff(__m64 *x,__m64 *y,int off)
@@ -2092,7 +2092,7 @@ static inline void dft16(int16_t *x,int16_t *y) __attribute__((always_inline));
 static inline void dft16(int16_t *x,int16_t *y)
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m128i *tw16a_128=(__m128i *)tw16a,*tw16b_128=(__m128i *)tw16b,*x128=(__m128i *)x,*y128=(__m128i *)y;
 
@@ -2226,7 +2226,7 @@ static inline void dft16(int16_t *x,int16_t *y)
 #endif
 }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
 // Does two 16-point DFTS (x[0 .. 15] is 128 LSBs of input vector, x[16..31] is in 128 MSBs) 
 static inline void dft16_simd256(int16_t *x,int16_t *y) __attribute__((always_inline));
@@ -2315,7 +2315,7 @@ static inline void idft16(int16_t *x,int16_t *y) __attribute__((always_inline));
 static inline void idft16(int16_t *x,int16_t *y)
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *tw16a_128=(__m128i *)tw16,*tw16b_128=(__m128i *)tw16c,*x128=(__m128i *)x,*y128=(__m128i *)y;
 
   /*
@@ -2445,7 +2445,7 @@ void idft16f(int16_t *x,int16_t *y) {
   idft16(x,y);
 }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
 // Does two 16-point IDFTS (x[0 .. 15] is 128 LSBs of input vector, x[16..31] is in 128 MSBs) 
 static inline void idft16_simd256(int16_t *x,int16_t *y) __attribute__((always_inline));
@@ -2571,7 +2571,7 @@ const static int16_t tw64c[96] __attribute__((aligned(32))) = {
 23170,-23170,15447,-28898,6393,-32138,-3211,-32610,
 -12539,-30273,-20787,-25330,-27244,-18205,-31356,-9512
                                                  };
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #define simd_q15_t __m128i
 #define simdshort_q15_t __m64
 #define shiftright_int16(a,shift) _mm_srai_epi16(a,shift)
@@ -10860,7 +10860,7 @@ int main(int argc, char**argv)
     ((int16_t *)&tw3)[7] = 0;
  */
     for (i=0;i<300;i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifndef __AVX2__
       x[i] = _mm_set1_epi32(taus());
       x[i] = _mm_srai_epi16(x[i],4);

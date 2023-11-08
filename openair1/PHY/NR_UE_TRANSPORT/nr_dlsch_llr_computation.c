@@ -41,7 +41,7 @@
 
 int16_t nr_zeros[8] __attribute__ ((aligned(16))) = {0,0,0,0,0,0,0,0};
 int16_t nr_ones[8] __attribute__ ((aligned(16))) = {0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff,0xffff};
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i rho_rpi __attribute__ ((aligned(16)));
 __m128i rho_rmi __attribute__ ((aligned(16)));
 __m128i rho_rpi_1_1 __attribute__ ((aligned(16)));
@@ -681,7 +681,7 @@ void nr_dlsch_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                      uint8_t beamforming_mode)
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxF = (__m128i*)&rxdataF_comp[(symbol*nb_rb*12)];
   __m128i *ch_mag;
   __m128i llr128[2];
@@ -698,13 +698,13 @@ void nr_dlsch_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
   unsigned char len_mod4=0;
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr32 = (uint32_t*)dlsch_llr;
 #elif defined(__arm__)
     llr16 = (int16_t*)dlsch_llr;
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   ch_mag = (__m128i*)&dl_ch_mag[(symbol*nb_rb*12)];
 #elif defined(__arm__)
   ch_mag = (int16x8_t*)&dl_ch_mag[(symbol*nb_rb*12)];
@@ -720,7 +720,7 @@ void nr_dlsch_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
  // printf("len+=%d\n", len);
   for (i=0; i<len; i++) {
 
-#if defined(__x86_64__) || defined(__i386)
+#if defined(__x86_64__) || defined(__i386) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = _mm_abs_epi16(rxF[i]);
     xmm0 = _mm_subs_epi16(ch_mag[i],xmm0);
 
@@ -762,7 +762,7 @@ void nr_dlsch_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -783,7 +783,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 			uint16_t nb_rb,
 			uint8_t beamforming_mode)
 {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxF = (__m128i*)&rxdataF_comp[(symbol*nb_rb*12)];
   __m128i *ch_mag,*ch_magb;
 #elif defined(__arm__)
@@ -796,7 +796,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   llr2 = dlsch_llr;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   ch_mag = (__m128i*)&dl_ch_mag[(symbol*nb_rb*12)];
   ch_magb = (__m128i*)&dl_ch_magb[(symbol*nb_rb*12)];
 #elif defined(__arm__)
@@ -819,7 +819,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   for (i=0; i<len2; i++) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm1 = _mm_abs_epi16(rxF[i]);
     xmm1 = _mm_subs_epi16(ch_mag[i],xmm1);
     xmm2 = _mm_abs_epi16(xmm1);
@@ -845,7 +845,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
     */
     llr2[0] = ((short *)&rxF[i])[0];
     llr2[1] = ((short *)&rxF[i])[1];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr2[2] = _mm_extract_epi16(xmm1,0);
     llr2[3] = _mm_extract_epi16(xmm1,1);//((short *)&xmm1)[j+1];
     llr2[4] = _mm_extract_epi16(xmm2,0);//((short *)&xmm2)[j];
@@ -860,7 +860,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
     llr2+=6;
     llr2[0] = ((short *)&rxF[i])[2];
     llr2[1] = ((short *)&rxF[i])[3];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr2[2] = _mm_extract_epi16(xmm1,2);
     llr2[3] = _mm_extract_epi16(xmm1,3);//((short *)&xmm1)[j+1];
     llr2[4] = _mm_extract_epi16(xmm2,2);//((short *)&xmm2)[j];
@@ -875,7 +875,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
     llr2+=6;
     llr2[0] = ((short *)&rxF[i])[4];
     llr2[1] = ((short *)&rxF[i])[5];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr2[2] = _mm_extract_epi16(xmm1,4);
     llr2[3] = _mm_extract_epi16(xmm1,5);//((short *)&xmm1)[j+1];
     llr2[4] = _mm_extract_epi16(xmm2,4);//((short *)&xmm2)[j];
@@ -889,7 +889,7 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
     llr2+=6;
     llr2[0] = ((short *)&rxF[i])[6];
     llr2[1] = ((short *)&rxF[i])[7];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr2[2] = _mm_extract_epi16(xmm1,6);
     llr2[3] = _mm_extract_epi16(xmm1,7);//((short *)&xmm1)[j+1];
     llr2[4] = _mm_extract_epi16(xmm2,6);//((short *)&xmm2)[j];
@@ -904,13 +904,13 @@ void nr_dlsch_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
 
-//#if 0
+#if 0
 void nr_dlsch_64qam_llr_SIC(NR_DL_FRAME_PARMS *frame_parms,
                          int32_t **rxdataF_comp,
                          int32_t **sic_buffer,  //Q15
@@ -1060,7 +1060,7 @@ void nr_dlsch_64qam_llr_SIC(NR_DL_FRAME_PARMS *frame_parms,
 
   }
 }
-//#endif
+#endif
 
 //----------------------------------------------------------------------------------------------
 // 256-QAM
@@ -1157,7 +1157,7 @@ void nr_dlsch_256qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 // QPSK
 //----------------------------------------------------------------------------------------------
 
-#if defined(__x86_64__) || defined(__i386)
+#if defined(__x86_64__) || defined(__i386) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i  y0r_over2 __attribute__ ((aligned(16)));
 __m128i  y0i_over2 __attribute__ ((aligned(16)));
 __m128i  y1r_over2 __attribute__ ((aligned(16)));
@@ -1174,6 +1174,7 @@ __m128i  H __attribute__ ((aligned(16)));
 
 #endif
 
+#if 0
 int nr_dlsch_qpsk_qpsk_llr(NR_DL_FRAME_PARMS *frame_parms,
                         int **rxdataF_comp,
                         int **rxdataF_comp_i,
@@ -1213,9 +1214,10 @@ int nr_dlsch_qpsk_qpsk_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
-
+#endif
 //__m128i ONE_OVER_SQRT_8 __attribute__((aligned(16)));
 
+#if 0
 void nr_qpsk_qpsk(short *stream0_in,
                short *stream1_in,
                short *stream0_out,
@@ -1235,7 +1237,7 @@ void nr_qpsk_qpsk(short *stream0_in,
     length = number of resource elements
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -1254,7 +1256,7 @@ void nr_qpsk_qpsk(short *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
     // in each iteration, we take 8 complex samples
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = rho01_128i[i]; // 4 symbols
     xmm1 = rho01_128i[i+1];
 
@@ -1284,7 +1286,7 @@ void nr_qpsk_qpsk(short *stream0_in,
     // Compute LLR for first bit of stream 0
 
     // Compute real and imaginary parts of MF output for stream 0
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = stream0_128i_in[i];
     xmm1 = stream0_128i_in[i+1];
 
@@ -1306,7 +1308,7 @@ void nr_qpsk_qpsk(short *stream0_in,
 
 #endif
     // Compute real and imaginary parts of MF output for stream 1
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     xmm0 = stream1_128i_in[i];
     xmm1 = stream1_128i_in[i+1];
 
@@ -1401,12 +1403,14 @@ void nr_qpsk_qpsk(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
+#endif
 
+#if 0
 int nr_dlsch_qpsk_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                          int32_t **rxdataF_comp,
                          int32_t **rxdataF_comp_i,
@@ -1462,9 +1466,9 @@ int nr_dlsch_qpsk_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
-
+#endif
 /*
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i ONE_OVER_SQRT_2 __attribute__((aligned(16)));
 __m128i ONE_OVER_SQRT_10 __attribute__((aligned(16)));
 __m128i THREE_OVER_SQRT_10 __attribute__((aligned(16)));
@@ -1473,6 +1477,7 @@ __m128i SQRT_10_OVER_FOUR __attribute__((aligned(16)));
 __m128i ch_mag_int;
 #endif
 */
+#if 0
 void nr_qpsk_qam16(int16_t *stream0_in,
                 int16_t *stream1_in,
                 int16_t *ch_mag_i,
@@ -1492,7 +1497,7 @@ void nr_qpsk_qam16(int16_t *stream0_in,
     length = number of resource elements
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -1526,7 +1531,7 @@ void nr_qpsk_qam16(int16_t *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // in each iteration, we take 8 complex samples
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     xmm0 = rho01_128i[i]; // 4 symbols
     xmm1 = rho01_128i[i+1];
@@ -1683,12 +1688,14 @@ void nr_qpsk_qam16(int16_t *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
+#endif
 
+#if 0
 int nr_dlsch_qpsk_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                          int32_t **rxdataF_comp,
                          int32_t **rxdataF_comp_i,
@@ -1744,6 +1751,8 @@ int nr_dlsch_qpsk_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
+#endif
+
 /*
 __m128i ONE_OVER_SQRT_2_42 __attribute__((aligned(16)));
 __m128i THREE_OVER_SQRT_2_42 __attribute__((aligned(16)));
@@ -1755,6 +1764,7 @@ __m128i two_ch_mag_int_with_sigma2 __attribute__((aligned(16)));
 __m128i three_ch_mag_int_with_sigma2 __attribute__((aligned(16)));
 __m128i SQRT_42_OVER_FOUR __attribute__((aligned(16)));
 */
+#if 0
 void nr_qpsk_qam64(short *stream0_in,
                 short *stream1_in,
                 short *ch_mag_i,
@@ -1775,7 +1785,7 @@ void nr_qpsk_qam64(short *stream0_in,
     length = number of resource elements
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -1805,7 +1815,7 @@ void nr_qpsk_qam64(short *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // in each iteration, we take 8 complex samples
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     xmm0 = rho01_128i[i]; // 4 symbols
     xmm1 = rho01_128i[i+1];
@@ -1981,12 +1991,12 @@ void nr_qpsk_qam64(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
-
+#endif
 
 //----------------------------------------------------------------------------------------------
 // 16-QAM
@@ -2006,7 +2016,7 @@ __m128i ch_mag_over_10 __attribute__ ((aligned(16)));
 __m128i ch_mag_over_2 __attribute__ ((aligned(16)));
 __m128i ch_mag_9_over_10 __attribute__ ((aligned(16)));
 */
-
+#if 0
 void nr_qam16_qpsk(short *stream0_in,
                 short *stream1_in,
                 short *ch_mag,
@@ -2031,7 +2041,7 @@ void nr_qam16_qpsk(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i       = (__m128i *)rho01;
   __m128i *stream0_128i_in  = (__m128i *)stream0_in;
   __m128i *stream1_128i_in  = (__m128i *)stream1_in;
@@ -2062,7 +2072,7 @@ void nr_qam16_qpsk(short *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // In one iteration, we deal with 8 REs
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -2448,13 +2458,15 @@ void nr_qam16_qpsk(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 
 }
+#endif
 
+#if 0
 int nr_dlsch_16qam_qpsk_llr(NR_DL_FRAME_PARMS *frame_parms,
                          int32_t **rxdataF_comp,
                          int32_t **rxdataF_comp_i,
@@ -2512,7 +2524,9 @@ int nr_dlsch_16qam_qpsk_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
+#endif
 
+#if 0
 void nr_qam16_qam16(short *stream0_in,
                  short *stream1_in,
                  short *ch_mag,
@@ -2537,7 +2551,7 @@ void nr_qam16_qam16(short *stream0_in,
     Output:
     stream0_out: output LLRs for 1st stream
   */
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i       = (__m128i *)rho01;
   __m128i *stream0_128i_in  = (__m128i *)stream0_in;
   __m128i *stream1_128i_in  = (__m128i *)stream1_in;
@@ -2570,7 +2584,7 @@ void nr_qam16_qam16(short *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // In one iteration, we deal with 8 REs
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -3001,12 +3015,14 @@ void nr_qam16_qam16(short *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
+#endif
 
+#if 0
 int nr_dlsch_16qam_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                           int32_t **rxdataF_comp,
                           int32_t **rxdataF_comp_i,
@@ -3054,7 +3070,9 @@ int nr_dlsch_16qam_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
+#endif
 
+#if 0
 void nr_qam16_qam64(int16_t *stream0_in,
                  int16_t *stream1_in,
                  int16_t *ch_mag,
@@ -3080,7 +3098,7 @@ void nr_qam16_qam64(int16_t *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i       = (__m128i *)rho01;
   __m128i *stream0_128i_in  = (__m128i *)stream0_in;
   __m128i *stream1_128i_in  = (__m128i *)stream1_in;
@@ -3120,7 +3138,7 @@ void nr_qam16_qam64(int16_t *stream0_in,
   for (i=0; i<length>>2; i+=2) {
     // In one iteration, we deal with 8 REs
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -3620,12 +3638,14 @@ void nr_qam16_qam64(int16_t *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
+#endif
 
+#if 0
 int nr_dlsch_16qam_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                           int32_t **rxdataF_comp,
                           int32_t **rxdataF_comp_i,
@@ -3688,6 +3708,7 @@ int nr_dlsch_16qam_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
+#endif
 
 //----------------------------------------------------------------------------------------------
 // 64-QAM
@@ -3730,6 +3751,7 @@ __m128i ch_mag_2_over_42_with_sigma2 __attribute__((aligned(16)));
 
 */
 
+#if 0
 void nr_qam64_qpsk(int16_t *stream0_in,
                 int16_t *stream1_in,
                 int16_t *ch_mag,
@@ -3754,7 +3776,7 @@ void nr_qam64_qpsk(int16_t *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rho01_128i      = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
   __m128i *stream1_128i_in = (__m128i *)stream1_in;
@@ -3803,7 +3825,7 @@ void nr_qam64_qpsk(int16_t *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
 
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -5185,13 +5207,14 @@ void nr_qam64_qpsk(int16_t *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
+#endif
 
-
+#if 0
 int nr_dlsch_64qam_qpsk_llr(NR_DL_FRAME_PARMS *frame_parms,
                          int32_t **rxdataF_comp,
                          int32_t **rxdataF_comp_i,
@@ -5246,7 +5269,7 @@ int nr_dlsch_64qam_qpsk_llr(NR_DL_FRAME_PARMS *frame_parms,
   *llr16p = (short *)llr16;
   return(0);
 }
-
+#endif
 
 
 void nr_qam64_qam16(short *stream0_in,
@@ -5274,7 +5297,7 @@ void nr_qam64_qam16(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m128i *rho01_128i      = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
@@ -5329,7 +5352,7 @@ void nr_qam64_qam16(short *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
     xmm0 = rho01_128i[i];
     xmm1 = rho01_128i[i+1];
@@ -6725,14 +6748,14 @@ void nr_qam64_qam16(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 
 }
 
-
+#if 0
 int nr_dlsch_64qam_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                           int32_t **rxdataF_comp,
                           int32_t **rxdataF_comp_i,
@@ -6790,6 +6813,7 @@ int nr_dlsch_64qam_16qam_llr(NR_DL_FRAME_PARMS *frame_parms,
   *llr16p = (short *)llr16;
   return(0);
 }
+#endif
 
 #if 0
 void qam64_qam64(short *stream0_in,
@@ -6817,7 +6841,7 @@ void qam64_qam64(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m128i *rho01_128i      = (__m128i *)rho01;
   __m128i *stream0_128i_in = (__m128i *)stream0_in;
@@ -6876,7 +6900,7 @@ void qam64_qam64(short *stream0_in,
 
   for (i=0; i<length>>2; i+=2) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     // Get rho
     xmm0 = rho01_128i[i];
@@ -8537,14 +8561,14 @@ void qam64_qam64(short *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
 }
 #endif
 
-
+#if 0
 int nr_dlsch_64qam_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
                           int32_t **rxdataF_comp,
                           int32_t **rxdataF_comp_i,
@@ -8648,3 +8672,4 @@ int nr_dlsch_64qam_64qam_llr(NR_DL_FRAME_PARMS *frame_parms,
 
   return(0);
 }
+#endif

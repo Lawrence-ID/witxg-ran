@@ -127,7 +127,7 @@ void phy_viterbi_lte_sse2(int8_t *y,uint8_t *decoded_bytes,uint16_t n)
 {
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i  TB[4*8192];
   __m128i *m0_ptr,*m1_ptr,*TB_ptr = &TB[0];
   
@@ -159,7 +159,7 @@ void phy_viterbi_lte_sse2(int8_t *y,uint8_t *decoded_bytes,uint16_t n)
   // set initial metrics
   //debug_msg("Doing viterbi\n");
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   metrics0_15  = _mm_setzero_si128();
   metrics16_31 = _mm_setzero_si128();
@@ -182,7 +182,7 @@ void phy_viterbi_lte_sse2(int8_t *y,uint8_t *decoded_bytes,uint16_t n)
       // get branch metric offsets for the 64 states
       table_offset = (in[0]+8 + ((in[1]+8)<<4) + ((in[2]+8)<<8))<<6;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       m0_ptr = (__m128i *)&m0_table[table_offset];
       m1_ptr = (__m128i *)&m1_table[table_offset];
 
@@ -327,7 +327,7 @@ void phy_viterbi_lte_sse2(int8_t *y,uint8_t *decoded_bytes,uint16_t n)
   prev_state0 = 0;
   maxm = 0;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   for (s=0; s<16; s++)
     if (((uint8_t *)&metrics0_15)[s] > maxm) {
       maxm = ((uint8_t *)&metrics0_15)[s];
@@ -395,7 +395,7 @@ void phy_viterbi_lte_sse2(int8_t *y,uint8_t *decoded_bytes,uint16_t n)
   }
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

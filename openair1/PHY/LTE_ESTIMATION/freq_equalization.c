@@ -296,7 +296,7 @@ void freq_equalization(LTE_DL_FRAME_PARMS *frame_parms,
 {
   uint16_t re;
   int16_t amp;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *ul_ch_mag128,*ul_ch_magb128,*rxdataF_comp128;
   rxdataF_comp128   = (__m128i *)&rxdataF_comp[0][symbol*frame_parms->N_RB_DL*12];
   ul_ch_mag128      = (__m128i *)&ul_ch_mag[0][symbol*frame_parms->N_RB_DL*12];
@@ -321,7 +321,7 @@ void freq_equalization(LTE_DL_FRAME_PARMS *frame_parms,
       amp=4095;
 
     //printf("freq_eq: symbol %d re %d => mag %d,amp %d,inv %d, prod %d (%d,%d)\n",symbol,re,*((int16_t*)(&ul_ch_mag128[re])),amp,_mm_extract_epi16(inv_ch[amp],0),(*((int16_t*)(&ul_ch_mag128[re]))*_mm_extract_epi16(inv_ch[amp],0))>>3,*(int16_t*)&(rxdataF_comp128[re]),*(1+(int16_t*)&(rxdataF_comp128[re])));
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     rxdataF_comp128[re] = _mm_srai_epi16(_mm_mullo_epi16(rxdataF_comp128[re],inv_ch[amp]),3);
 
     if (Qm==4)

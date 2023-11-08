@@ -660,7 +660,7 @@ void qam64_qam16_avx2(short *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m256i *rho01_256i      = (__m256i *)rho01;
   __m256i *stream0_256i_in = (__m256i *)stream0_in;
@@ -714,7 +714,7 @@ void qam64_qam16_avx2(short *stream0_in,
 
   for (i=0; i<len256; i+=2) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     // Get rho
       /*
     xmm0 = rho01_128i[i];
@@ -2184,7 +2184,7 @@ void qam64_qam16_avx2(short *stream0_in,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -2216,7 +2216,7 @@ void qam64_qam64_avx2(int32_t *stream0_in,
     stream0_out: output LLRs for 1st stream
   */
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   __m256i *rho01_256i      = (__m256i *)rho01;
   __m256i *stream0_256i_in = (__m256i *)stream0_in;
@@ -2275,7 +2275,7 @@ void qam64_qam64_avx2(int32_t *stream0_in,
 
   for (i=0; i<len256; i+=2) {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
     // Get rho
       /*
@@ -4025,7 +4025,7 @@ void qam64_qam64_avx2(int32_t *stream0_in,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

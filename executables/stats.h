@@ -24,6 +24,7 @@
 #ifndef _EXECUTABLES_STATS_H_
 #define _EXECUTABLES_STATS_H_
 
+#ifdef XFORMS
 #include <forms.h>
 
 /* Callbacks, globals and object handlers */
@@ -42,5 +43,6 @@ typedef struct {
 } FD_stats_form;
 
 extern FD_stats_form *create_form_stats_form( void );
+#endif
 
 #endif /* _EXECUTABLES_STATS_H_ */

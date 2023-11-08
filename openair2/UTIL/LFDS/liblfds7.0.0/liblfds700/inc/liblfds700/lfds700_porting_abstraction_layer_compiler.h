@@ -412,7 +412,7 @@
   }
 
   // TRD : ARM and x86 have DWCAS which we can get via GCC intrinsics
-  #if( defined __arm__ || defined __i686__ || defined __i586__ || defined __i486__ )
+  #if( defined __arm__ || defined __i686__ || defined __i586__ || defined __i486__ || defined __riscv)
     #define LFDS700_PAL_ATOMIC_DWCAS( pointer_to_destination, pointer_to_compare, pointer_to_new_destination, cas_strength, result )                                                                                                                                                          \
     {                                                                                                                                                                                                                                                                                         \
       /* LFDS700_PAL_ASSERT( (pointer_to_destination) != NULL ); */                                                                                                                                                                                                                           \

@@ -28,7 +28,7 @@
 #include "PHY/defs_eNB.h"
 //#define DEBUG_PHY
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 __m128i avg128F;
 #elif defined(__arm__)
 int32x4_t avg128F;
@@ -40,7 +40,7 @@ int dl_channel_level(int16_t *dl_ch,
 {
 
   int16_t rb;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *dl_ch128;
 #elif defined(__arm__)
   int16x4_t *dl_ch128;
@@ -48,7 +48,7 @@ int dl_channel_level(int16_t *dl_ch,
   int avg;
 
   //clear average level
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   avg128F = _mm_setzero_si128();
   dl_ch128=(__m128i *)dl_ch;
 
@@ -87,7 +87,7 @@ int dl_channel_level(int16_t *dl_ch,
          ((int*)&avg128F)[3])/(frame_parms->N_RB_DL*12);
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

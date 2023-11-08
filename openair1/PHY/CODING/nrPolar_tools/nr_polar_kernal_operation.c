@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#include <immintrin.h>
+#include "PHY/sse_intrin.h"
 
 void nr_polar_kernal_operation(uint8_t *u, uint8_t *d, uint16_t N)
 {

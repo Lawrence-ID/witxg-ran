@@ -24,11 +24,11 @@
 #include <chrono>
 
 #ifdef __SSE4_1__
-#  include <smmintrin.h>
+#include "PHY/sse_intrin.h"
 #endif
 
 #ifdef __AVX2__
-#  include <immintrin.h>
+#include "PHY/sse_intrin.h"
 #endif
 
 #define MOVE_DC
@@ -151,7 +151,7 @@ trx_iris_write(openair0_device *device, openair0_timestamp timestamp, void **buf
 
     iris_state_t *s = (iris_state_t *) device->priv;
     int nsamps2;  // aligned to upper 32 or 16 byte boundary
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   #ifdef __AVX2__
     nsamps2 = (nsamps+7)>>3;
     __m256i buff_tx[2][nsamps2];
@@ -166,7 +166,7 @@ trx_iris_write(openair0_device *device, openair0_timestamp timestamp, void **buf
     // bring RX data into 12 LSBs for softmodem RX
     for (int i=0; i<cc; i++) {
       for (int j=0; j<nsamps2; j++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
         buff_tx[i][j] = _mm256_slli_epi16(((__m256i *)buff[i])[j],4);
 #else
@@ -252,7 +252,7 @@ static int trx_iris_read(openair0_device *device, openair0_timestamp *ptimestamp
     int r;
     int m = s->rx_num_channels;
     int nsamps2;  // aligned to upper 32 or 16 byte boundary
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     nsamps2 = (nsamps+7)>>3;
     __m256i buff_tmp[2][nsamps2];
@@ -330,7 +330,7 @@ static int trx_iris_read(openair0_device *device, openair0_timestamp *ptimestamp
         // bring RX data into 12 LSBs for softmodem RX
         for (int i=0; i<cc; i++) {
           for (int j=0; j<nsamps2; j++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef   __AVX2__
             ((__m256i *)buff[i])[j] = _mm256_srai_epi16(buff_tmp[i][j],4);
 #else

@@ -35,7 +35,7 @@ void apply_7_5_kHz(PHY_VARS_UE *ue,int32_t*txdata,uint8_t slot)
 
   uint16_t len;
   uint32_t *kHz7_5ptr;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *txptr128,*kHz7_5ptr128,mmtmp_re,mmtmp_im,mmtmp_re2,mmtmp_im2;
 #elif defined(__arm__)
   int16x8_t *txptr128,*kHz7_5ptr128;
@@ -81,7 +81,7 @@ void apply_7_5_kHz(PHY_VARS_UE *ue,int32_t*txdata,uint8_t slot)
   slot_offset = (uint32_t)slot * frame_parms->samples_per_tti/2;
   len = frame_parms->samples_per_tti/2;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   txptr128 = (__m128i *)&txdata[slot_offset];
   kHz7_5ptr128 = (__m128i *)kHz7_5ptr;
 #elif defined(__arm__)
@@ -91,7 +91,7 @@ void apply_7_5_kHz(PHY_VARS_UE *ue,int32_t*txdata,uint8_t slot)
   // apply 7.5 kHz
 
   for (i=0; i<(len>>2); i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     mmtmp_re = _mm_madd_epi16(*txptr128,*kHz7_5ptr128);
     // Real part of complex multiplication (note: 7_5kHz signal is conjugated for this to work)
     mmtmp_im = _mm_shufflelo_epi16(*kHz7_5ptr128,_MM_SHUFFLE(2,3,0,1));

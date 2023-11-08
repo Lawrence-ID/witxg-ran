@@ -724,7 +724,7 @@ void ocp_tx_rf(RU_t *ru, L1_rxtx_proc_t *proc) {
       sf_extension = ru->sf_extension;
     }
 
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     sf_extension = (sf_extension)&0xfffffff8;
 #else

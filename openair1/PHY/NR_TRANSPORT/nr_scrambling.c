@@ -81,7 +81,7 @@ void nr_codeword_unscrambling(int16_t* llr, uint32_t size, uint8_t q, uint32_t N
   uint32_t x2 = (n_RNTI << 15) + (q << 14) + Nid;
   uint32_t s = 0;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   uint8_t *s8=(uint8_t *)&s;
   __m128i *llr128 = (__m128i*)llr;
   s = lte_gold_generic(&x1, &x2, 1);

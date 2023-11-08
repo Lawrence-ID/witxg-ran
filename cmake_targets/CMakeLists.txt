@@ -137,7 +137,16 @@ elseif(EXISTS "/usr/include/x86_64-linux-gnu/cblas.h")
   list(APPEND ATLAS_LIBRARIES cblas)
   list(APPEND ATLAS_LIBRARIES atlas)
   list(APPEND ATLAS_LIBRARIES lapack)
-  
+
+# for riscv64, directories are different
+elseif(EXISTS "/usr/include/riscv64-linux-gnu/cblas.h")
+
+  include_directories("/usr/include/riscv64-linux-gnu")
+  LINK_DIRECTORIES("/usr/lib/riscv64-linux-gnu")
+  list(APPEND ATLAS_LIBRARIES cblas)
+  list(APPEND ATLAS_LIBRARIES atlas)
+  list(APPEND ATLAS_LIBRARIES lapack)
+
 else()
   message("No Blas/Atlas libs found, some targets will fail")
 endif()

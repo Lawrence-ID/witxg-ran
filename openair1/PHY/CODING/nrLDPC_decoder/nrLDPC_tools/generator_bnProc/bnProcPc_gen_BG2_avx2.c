@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
-#include <immintrin.h>
+#include "../../../../sse_intrin.h"
 #include "../../nrLDPCdecoder_defs.h"
 #include "../../nrLDPC_types.h"
 

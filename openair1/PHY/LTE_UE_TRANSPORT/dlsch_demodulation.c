@@ -1229,7 +1229,7 @@ void dlsch_channel_compensation(int **rxdataF_ext,
                                 unsigned short nb_rb,
                                 unsigned char output_shift,
                                 PHY_MEASUREMENTS *measurements) {
-#if defined(__i386) || defined(__x86_64)
+#if defined(__i386) || defined(__x86_64) || defined SIMDE_ENABLE_NATIVE_ALIASES
   unsigned short rb;
   unsigned char aatx,aarx,symbol_mod,pilots=0;
   __m128i *dl_ch128,*dl_ch128_2,*dl_ch_mag128,*dl_ch_mag128b,*rxdataF128,*rxdataF_comp128,*rho128;
@@ -1823,7 +1823,7 @@ void dlsch_channel_compensation_core(int **rxdataF_ext,
   _m_empty();
 }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
 void prec2A_TM56_128(unsigned char pmi,__m128i *ch0,__m128i *ch1) {
   __m128i amp;
@@ -1998,7 +1998,7 @@ void dlsch_channel_compensation_TM56(int **rxdataF_ext,
                                      unsigned short nb_rb,
                                      unsigned char output_shift,
                                      unsigned char dl_power_off) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   unsigned short rb,Nre;
   __m128i *dl_ch0_128,*dl_ch1_128,*dl_ch_mag128,*dl_ch_mag128b,*rxdataF128,*rxdataF_comp128;
   unsigned char aarx=0,symbol_mod,pilots=0;
@@ -2395,7 +2395,7 @@ void dlsch_channel_compensation_TM34(LTE_DL_FRAME_PARMS *frame_parms,
                                      unsigned short mmse_flag,
                                      unsigned char output_shift0,
                                      unsigned char output_shift1) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   unsigned short rb,Nre;
   __m128i *dl_ch0_128,*dl_ch1_128,*dl_ch_mag0_128,*dl_ch_mag1_128,*dl_ch_mag0_128b,*dl_ch_mag1_128b,*rxdataF128,*rxdataF_comp0_128,*rxdataF_comp1_128;
   unsigned char aarx=0,symbol_mod,pilots=0;
@@ -2979,7 +2979,7 @@ void dlsch_dual_stream_correlation(LTE_DL_FRAME_PARMS *frame_parms,
                                    int **dl_ch_estimates_ext_i,
                                    int **dl_ch_rho_ext,
                                    unsigned char output_shift) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   unsigned short rb;
   __m128i *dl_ch128,*dl_ch128i,*dl_ch_rho128,mmtmpD0,mmtmpD1,mmtmpD2,mmtmpD3;
   unsigned char aarx,symbol_mod,pilots=0;
@@ -3081,7 +3081,7 @@ void dlsch_detection_mrc(LTE_DL_FRAME_PARMS *frame_parms,
                          unsigned char symbol,
                          unsigned short nb_rb,
                          unsigned char dual_stream_UE) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   unsigned char aatx;
   int i;
   __m128i *rxdataF_comp128_0,*rxdataF_comp128_1,*rxdataF_comp128_i0,*rxdataF_comp128_i1,*dl_ch_mag128_0,*dl_ch_mag128_1,*dl_ch_mag128_0b,*dl_ch_mag128_1b,*rho128_0,*rho128_1,*rho128_i0,*rho128_i1,
@@ -3326,7 +3326,7 @@ void dlsch_scale_channel(int **dl_ch_estimates_ext,
                          LTE_UE_DLSCH_t **dlsch_ue,
                          uint8_t symbol,
                          unsigned short nb_rb) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short rb, ch_amp;
   unsigned char aatx,aarx,pilots=0,symbol_mod;
   __m128i *dl_ch128, ch_amp128;
@@ -3376,7 +3376,7 @@ void dlsch_channel_level(int **dl_ch_estimates_ext,
                          int32_t *avg,
                          uint8_t symbol,
                          unsigned short nb_rb) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   //printf("symbol = %d\n", symbol);
   short rb;
   unsigned char aatx,aarx,nre=12,symbol_mod;
@@ -3495,7 +3495,7 @@ void dlsch_channel_level_core(int **dl_ch_estimates_ext,
                               int n_rx,
                               int length,
                               int start_point) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short ii;
   int aatx,aarx;
   int length_mod8;
@@ -3587,7 +3587,7 @@ void dlsch_channel_level_median(int **dl_ch_estimates_ext,
                                 int n_rx,
                                 int length,
                                 int start_point) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short ii;
   int aatx,aarx;
   int length2;
@@ -3927,7 +3927,7 @@ void dlsch_channel_aver_band(int **dl_ch_estimates_ext,
                              struct complex32 *chan_avg,
                              unsigned char symbol,
                              unsigned short nb_rb) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short rb;
   unsigned char aatx,aarx,nre=12,symbol_mod;
   __m128i *dl_ch128, avg128D;
@@ -4254,7 +4254,7 @@ void dlsch_channel_level_TM34(int **dl_ch_estimates_ext,
                               unsigned short nb_rb,
                               unsigned int mmse_flag,
                               MIMO_mode_t mimo_mode) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short rb;
   unsigned char aarx,nre=12,symbol_mod;
   __m128i *dl_ch0_128,*dl_ch1_128, dl_ch0_128_tmp, dl_ch1_128_tmp, avg_0_128D, avg_1_128D;
@@ -4380,7 +4380,7 @@ void dlsch_channel_level_TM56(int **dl_ch_estimates_ext,
                               int *avg,
                               uint8_t symbol,
                               unsigned short nb_rb) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short rb;
   unsigned char aarx,nre=12,symbol_mod;
   __m128i *dl_ch0_128,*dl_ch1_128, dl_ch0_128_tmp, dl_ch1_128_tmp,avg128D;
@@ -4448,7 +4448,7 @@ void dlsch_channel_level_TM7(int **dl_bf_ch_estimates_ext,
                              int *avg,
                              uint8_t symbol,
                              unsigned short nb_rb) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short rb;
   unsigned char aatx,aarx,nre=12,symbol_mod;
   __m128i *dl_ch128,avg128D;
@@ -4511,7 +4511,7 @@ void dlsch_alamouti(LTE_DL_FRAME_PARMS *frame_parms,
                     int **dl_ch_magb,
                     unsigned char symbol,
                     unsigned short nb_rb) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
   short *rxF0,*rxF1;
   __m128i *ch_mag0,*ch_mag1,*ch_mag0b,*ch_mag1b, *rxF0_128;
   unsigned char rb,re;

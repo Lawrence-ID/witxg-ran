@@ -22,7 +22,9 @@
 #ifndef __OTG_FORM_H__
 # define __OTG_FORM_H__
 
+#ifdef XFORMS
 #include <forms.h>
+#endif
 #include <stdlib.h>
 #include "otg.h"
 

@@ -23,7 +23,7 @@
 #include "tools_defs.h"
 #include <stdio.h>
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 int16_t conjug[8]__attribute__((aligned(16))) = {-1,1,-1,1,-1,1,-1,1} ;
 int16_t conjug2[8]__attribute__((aligned(16))) = {1,-1,1,-1,1,-1,1,-1} ;
 
@@ -66,7 +66,7 @@ int mult_cpx_conj_vector(int16_t *x1,
   simd_q15_t *x1_128;
   simd_q15_t *x2_128;
   simd_q15_t *y_128;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   simd_q15_t tmp_re,tmp_im;
   simd_q15_t tmpy0,tmpy1;
 
@@ -84,7 +84,7 @@ int mult_cpx_conj_vector(int16_t *x1,
 
   // we compute 4 cpx multiply for each loop
   for(i=0; i<(N>>2); i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     tmp_re = _mm_madd_epi16(*x1_128,*x2_128);
     tmp_im = _mm_shufflelo_epi16(*x1_128,_MM_SHUFFLE(2,3,0,1));
     tmp_im = _mm_shufflehi_epi16(tmp_im,_MM_SHUFFLE(2,3,0,1));
@@ -224,7 +224,7 @@ int multadd_cpx_vector(int16_t *x1,
   simd_q15_t *x1_128;
   simd_q15_t *x2_128;
   simd_q15_t *y_128;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   simd_q15_t tmp_re,tmp_im;
   simd_q15_t tmpy0,tmpy1;
 #elif defined(__arm__)
@@ -238,7 +238,7 @@ int multadd_cpx_vector(int16_t *x1,
   y_128  = (simd_q15_t *)&y[0];
   // we compute 4 cpx multiply for each loop
   for(i=0; i<(N>>2); i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     tmp_re = _mm_sign_epi16(*x1_128,*(__m128i*)&conjug2[0]);
     tmp_re = _mm_madd_epi16(tmp_re,*x2_128);
     tmp_im = _mm_shufflelo_epi16(*x1_128,_MM_SHUFFLE(2,3,0,1));

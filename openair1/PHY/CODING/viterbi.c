@@ -183,7 +183,7 @@ void phy_generate_viterbi_tables(void)
 void phy_viterbi_dot11_sse2(char *y,unsigned char *decoded_bytes,unsigned short n,int offset, int traceback )
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i  TB[4*4095*8]; // 4 __m128i per input bit (64 states, 8-bits per state = 16-way), 4095 is largest packet size in bytes, 8 bits/byte
 
   __m128i metrics0_15,metrics16_31,metrics32_47,metrics48_63,even0_30a,even0_30b,even32_62a,even32_62b,odd1_31a,odd1_31b,odd33_63a,odd33_63b,TBeven0_30,TBeven32_62,TBodd1_31,TBodd33_63;
@@ -214,7 +214,7 @@ void phy_viterbi_dot11_sse2(char *y,unsigned char *decoded_bytes,unsigned short 
   short position;
 
   //  printf("offset %d, TB_ptr %p\n",offset,TB_ptr);
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   if (offset == 0) {
     // set initial metrics
 
@@ -244,7 +244,7 @@ void phy_viterbi_dot11_sse2(char *y,unsigned char *decoded_bytes,unsigned short 
     // get branch metric offsets for the 64 states
     table_offset = (in[0]+8 + ((in[1]+8)<<4))<<6;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     m0_ptr = (__m128i *)&m0_table[table_offset];
     m1_ptr = (__m128i *)&m1_table[table_offset];
 
@@ -405,7 +405,7 @@ void phy_viterbi_dot11_sse2(char *y,unsigned char *decoded_bytes,unsigned short 
     }
   }
 
-#if defined(__x86_64) || defined(__i386__)
+#if defined(__x86_64) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
 #endif
 }

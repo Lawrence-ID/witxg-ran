@@ -22,7 +22,7 @@
 #include "PHY/sse_intrin.h"
 #include "tools_defs.h"
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #define simd_q15_t __m128i
 #define simdshort_q15_t __m64
 #define shiftright_int16(a,shift) _mm_srai_epi16(a,shift)
@@ -98,7 +98,7 @@ void multadd_real_vector_complex_scalar(int16_t *x,
 
     yr     = mulhi_s1_int16(alpha_r_128,x_128[i]);
     yi     = mulhi_s1_int16(alpha_i_128,x_128[i]);
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     y_128[j]   = _mm_adds_epi16(y_128[j],_mm_unpacklo_epi16(yr,yi));
     j++;
     y_128[j]   = _mm_adds_epi16(y_128[j],_mm_unpackhi_epi16(yr,yi));
@@ -171,7 +171,7 @@ void rotate_cpx_vector(c16_t *x,
   simd_q15_t *y_128,alpha_128;
   int32_t *xd=(int32_t *)x; 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i shift = _mm_cvtsi32_si128(output_shift);
   register simd_q15_t m0,m1,m2,m3;
 
@@ -205,7 +205,7 @@ void rotate_cpx_vector(c16_t *x,
 
 
   for(i=0; i<N>>2; i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     m0 = _mm_setr_epi32(xd[0],xd[0],xd[1],xd[1]);
     m1 = _mm_setr_epi32(xd[2],xd[2],xd[3],xd[3]);
     m2 = _mm_madd_epi16(m0,alpha_128); //complex multiply. result is 32bit [Re Im Re Im]

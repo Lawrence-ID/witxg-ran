@@ -71,7 +71,7 @@ void nr_ulsch_16qam_llr(int32_t *rxdataF_comp,
                         uint8_t  symbol)
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
   __m256i *rxF = (__m256i*)rxdataF_comp;
   __m256i *ch_mag;
@@ -102,13 +102,13 @@ void nr_ulsch_16qam_llr(int32_t *rxdataF_comp,
 #endif
 
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     llr32 = (uint32_t*)ulsch_llr;
 #elif defined(__arm__)
     llr16 = (int16_t*)ulsch_llr;
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     ch_mag = (__m256i*)&ul_ch_mag[(symbol*(off+(nb_rb*12)))];
 #else
@@ -129,7 +129,7 @@ void nr_ulsch_16qam_llr(int32_t *rxdataF_comp,
 #endif
 
   for (i=0; i<nb_re; i++) {
-#if defined(__x86_64__) || defined(__i386)
+#if defined(__x86_64__) || defined(__i386) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     xmm0 = _mm256_abs_epi16(rxF[i]); // registers of even index in xmm0-> |y_R|, registers of odd index in xmm0-> |y_I|
     xmm0 = _mm256_subs_epi16(ch_mag[i],xmm0); // registers of even index in xmm0-> |y_R|-|h|^2, registers of odd index in xmm0-> |y_I|-|h|^2
@@ -220,7 +220,7 @@ void nr_ulsch_16qam_llr(int32_t *rxdataF_comp,
 
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -245,7 +245,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
   int off = 0;
 #endif
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
   __m256i *rxF = (__m256i*)rxdataF_comp;
   __m256i *ch_mag,*ch_magb;
@@ -263,7 +263,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
 
   int i;
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
   ch_mag = (__m256i*)&ul_ch_mag[(symbol*(off+(nb_rb*12)))];
   ch_magb = (__m256i*)&ul_ch_magb[(symbol*(off+(nb_rb*12)))];
@@ -288,7 +288,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
 
   for (i=0; i<nb_re; i++) {
     xmm0 = rxF[i];
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     xmm1 = _mm256_abs_epi16(xmm0);
     xmm1 = _mm256_subs_epi16(ch_mag[i],xmm1);
@@ -310,7 +310,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
     // ---------------------------------------
     // 1st RE
     // ---------------------------------------
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     ulsch_llr[0] = _mm256_extract_epi16(xmm0,0);
     ulsch_llr[1] = _mm256_extract_epi16(xmm0,1);
@@ -341,7 +341,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
     // ---------------------------------------
     // 2nd RE
     // ---------------------------------------
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     ulsch_llr[0] = _mm256_extract_epi16(xmm0,2);
     ulsch_llr[1] = _mm256_extract_epi16(xmm0,3);
@@ -372,7 +372,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
     // ---------------------------------------
     // 3rd RE
     // ---------------------------------------
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     ulsch_llr[0] = _mm256_extract_epi16(xmm0,4);
     ulsch_llr[1] = _mm256_extract_epi16(xmm0,5);
@@ -403,7 +403,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
     // ---------------------------------------
     // 4th RE
     // ---------------------------------------
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 #ifdef __AVX2__
     ulsch_llr[0] = _mm256_extract_epi16(xmm0,6);
     ulsch_llr[1] = _mm256_extract_epi16(xmm0,7);
@@ -463,7 +463,7 @@ void nr_ulsch_64qam_llr(int32_t *rxdataF_comp,
 #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

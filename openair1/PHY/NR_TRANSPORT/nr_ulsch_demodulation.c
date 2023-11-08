@@ -18,7 +18,7 @@
 void nr_idft(int32_t *z, uint32_t Msc_PUSCH)
 {
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i idft_in128[1][3240], idft_out128[1][3240];
   __m128i norm128;
 #elif defined(__arm__)
@@ -34,7 +34,7 @@ void nr_idft(int32_t *z, uint32_t Msc_PUSCH)
   if ((Msc_PUSCH % 1536) > 0) {
     // conjugate input
     for (i = 0; i < (Msc_PUSCH>>2); i++) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
       *&(((__m128i*)z)[i]) = _mm_sign_epi16(*&(((__m128i*)z)[i]), *(__m128i*)&conjugate2[0]);
 #elif defined(__arm__)
       *&(((int16x8_t*)z)[i]) = vmulq_s16(*&(((int16x8_t*)z)[i]), *(int16x8_t*)&conjugate2[0]);
@@ -48,14 +48,14 @@ void nr_idft(int32_t *z, uint32_t Msc_PUSCH)
     case 12:
       dft(DFT_12,(int16_t *)idft_in0, (int16_t *)idft_out0,0);
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
       norm128 = _mm_set1_epi16(9459);
 #elif defined(__arm__)
       norm128 = vdupq_n_s16(9459);
 #endif
 
       for (i = 0; i < 12; i++) {
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
         ((__m128i*)idft_out0)[i] = _mm_slli_epi16(_mm_mulhi_epi16(((__m128i*)idft_out0)[i], norm128), 1);
 #elif defined(__arm__)
         ((int16x8_t*)idft_out0)[i] = vqdmulhq_s16(((int16x8_t*)idft_out0)[i], norm128);
@@ -286,7 +286,7 @@ void nr_idft(int32_t *z, uint32_t Msc_PUSCH)
 
     // conjugate output
     for (i = 0; i < (Msc_PUSCH>>2); i++) {
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
       ((__m128i*)z)[i] = _mm_sign_epi16(((__m128i*)z)[i], *(__m128i*)&conjugate2[0]);
 #elif defined(__arm__)
       *&(((int16x8_t*)z)[i]) = vmulq_s16(*&(((int16x8_t*)z)[i]), *(int16x8_t*)&conjugate2[0]);
@@ -294,7 +294,7 @@ void nr_idft(int32_t *z, uint32_t Msc_PUSCH)
     }
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif
@@ -409,7 +409,7 @@ void nr_ulsch_scale_channel(int **ul_ch_estimates_ext,
                             unsigned short nb_rb)
 {
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
 
   short rb, ch_amp;
   unsigned char aarx,aatx;
@@ -461,7 +461,7 @@ void nr_ulsch_channel_level(int **ul_ch_estimates_ext,
                             unsigned short nb_rb)
 {
 
-#if defined(__x86_64__)||defined(__i386__)
+#if defined(__x86_64__)||defined(__i386__)|| defined SIMDE_ENABLE_NATIVE_ALIASES
 
   short rb;
   unsigned char aatx, aarx;
@@ -624,7 +624,7 @@ void nr_ulsch_channel_compensation(int **rxdataF_ext,
 
 #endif
 
-#if defined(__i386) || defined(__x86_64__)
+#if defined(__i386) || defined(__x86_64__) || defined SIMDE_ENABLE_NATIVE_ALIASES
 
   unsigned short rb;
   unsigned char aatx,aarx;
@@ -1139,7 +1139,7 @@ void nr_ulsch_detection_mrc(NR_DL_FRAME_PARMS *frame_parms,
                 uint16_t nb_rb,
                 int length) {
   int n_rx = frame_parms->nb_antennas_rx;
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   __m128i *rxdataF_comp128[2],*ul_ch_mag128[2],*ul_ch_mag128b[2];
 #elif defined(__arm__)
   int16x8_t *rxdataF_comp128_0,*ul_ch_mag128_0,*ul_ch_mag128_0b;
@@ -1155,7 +1155,7 @@ void nr_ulsch_detection_mrc(NR_DL_FRAME_PARMS *frame_parms,
 #endif
 
   if (n_rx > 1) {
-    #if defined(__x86_64__) || defined(__i386__)
+    #if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
     for (int aatx=0; aatx<nrOfLayers; aatx++) {
       int nb_re = nb_rb*12;
 
@@ -1195,7 +1195,7 @@ void nr_ulsch_detection_mrc(NR_DL_FRAME_PARMS *frame_parms,
     #endif
   }
 
-#if defined(__x86_64__) || defined(__i386__)
+#if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
   _mm_empty();
   _m_empty();
 #endif

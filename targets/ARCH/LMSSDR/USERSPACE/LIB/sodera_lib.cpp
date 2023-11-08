@@ -47,11 +47,11 @@
 #include "LMS_StreamBoard.h"
 
 #ifdef __SSE4_1__
-#  include <smmintrin.h>
+#include "PHY/sse_intrin.h"
 #endif
  
 #ifdef __AVX2__
-#  include <immintrin.h>
+#include "PHY/sse_intrin.h"
 #endif
 
 using namespace std;

@@ -188,7 +188,7 @@
 
 
 /****************************************************************************/
-#if( defined __GNUC__ && (defined __i686__ || defined __i586__ || defined __i486__) )
+#if( defined __GNUC__ && (defined __i686__ || defined __i586__ || defined __i486__ || defined __riscv) )
 
   /* TRD : GCC, x86
 

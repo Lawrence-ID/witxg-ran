@@ -49,7 +49,7 @@
   #define LFDS700_PAL_PORTING_ABSTRACTION_LAYER_OPERATING_SYSTEM
 
   #include <assert.h>
-  #include <intrin.h>
+  #include "PHY/sse_intrin.h"
 
   #define LFDS700_PAL_OS_STRING             "Windows"
   #define LFDS700_PAL_ASSERT( expression )  assert( expression )
