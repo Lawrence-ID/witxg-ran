@@ -30,6 +30,7 @@
 * \warning
 */
 
+#include <sys/time.h>
 #include "nr_dlsch.h"
 #include "nr_dci.h"
 #include "nr_sch_dmrs.h"
@@ -37,6 +38,7 @@
 #include "PHY/NR_REFSIG/dmrs_nr.h"
 #include "PHY/NR_REFSIG/ptrs_nr.h"
 #include "common/utils/LOG/vcd_signal_dumper.h"
+#include "common/utils/LOG/px_log.h"
 #include "common/utils/nr/nr_common.h"
 #include "executables/softmodem-common.h"
 
@@ -130,13 +132,20 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     unsigned char output[rel15->rbSize * NR_SYMBOLS_PER_SLOT * NR_NB_SC_PER_RB * Qm * rel15->nrOfLayers] __attribute__((aligned(32)));
     bzero(output,rel15->rbSize * NR_SYMBOLS_PER_SLOT * NR_NB_SC_PER_RB * Qm * rel15->nrOfLayers);
     start_meas(dlsch_encoding_stats);
-
+#ifdef TIME_STATISTIC
+    gettimeofday(&st, NULL);
+#endif
     if (nr_dlsch_encoding(gNB,
                           frame, slot, harq, frame_parms,output,tinput,tprep,tparity,toutput,
                           dlsch_rate_matching_stats,
                           dlsch_interleaving_stats,
                           dlsch_segmentation_stats) == -1)
       return;
+#ifdef TIME_STATISTIC
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[nr_dlsch_encoding] cost time = %lf\n",time_total);
+#endif
     stop_meas(dlsch_encoding_stats);
 #ifdef DEBUG_DLSCH
     printf("PDSCH encoding:\nPayload:\n");
@@ -160,6 +169,9 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     for (int q=0; q<rel15->NrOfCodewords; q++) {
       /// scrambling
       start_meas(dlsch_scrambling_stats);
+#ifdef TIME_STATISTIC
+      gettimeofday(&st, NULL);
+#endif
       uint32_t scrambled_output[(encoded_length>>5)+4]; // modulator acces by 4 bytes in some cases
       memset(scrambled_output, 0, sizeof(scrambled_output));
       if ( encoded_length > rel15->rbSize * NR_SYMBOLS_PER_SLOT * NR_NB_SC_PER_RB * Qm * rel15->nrOfLayers) abort();
@@ -178,15 +190,28 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         printf("\n");
       }
 #endif
-
+#ifdef TIME_STATISTIC
+      gettimeofday(&ed, NULL);
+      time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+      Log("[nr_pdsch_codeword_scrambling] cost time = %lf\n",time_total);
+#endif
       stop_meas(dlsch_scrambling_stats);
+
       /// Modulation
       start_meas(dlsch_modulation_stats);
+#ifdef TIME_STATISTIC
+      gettimeofday(&st, NULL);
+#endif
       nr_modulation(scrambled_output,
                     encoded_length,
                     Qm,
                     mod_symbs[q]);
       VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_gNB_PDSCH_MODULATION, 0);
+#ifdef TIME_STATISTIC
+      gettimeofday(&ed, NULL);
+      time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+      Log("[nr_modulation] cost time = %lf\n",time_total);
+#endif
       stop_meas(dlsch_modulation_stats);
 #ifdef DEBUG_DLSCH
       printf("PDSCH Modulation: Qm %d(%d)\n", Qm, nb_re);
@@ -201,6 +226,9 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     
     start_meas(&gNB->dlsch_layer_mapping_stats); 
     /// Layer mapping
+#ifdef TIME_STATISTIC
+    gettimeofday(&st, NULL);
+#endif
     nr_layer_mapping(mod_symbs,
                      rel15->nrOfLayers,
                      nb_re,
@@ -216,7 +244,11 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         printf("\n");
       }
 #endif
-
+#ifdef TIME_STATISTIC
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[nr_layer_mapping] cost time = %lf\n",time_total);
+#endif
     stop_meas(&gNB->dlsch_layer_mapping_stats); 
 
     /// Resource mapping
@@ -237,6 +269,9 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
 #endif
 
     start_meas(&gNB->dlsch_resource_mapping_stats);
+#ifdef TIME_STATISTIC
+    gettimeofday(&st, NULL);
+#endif
     for (int nl=0; nl<rel15->nrOfLayers; nl++) {
 
       int dmrs_port = get_dmrs_port(nl,rel15->dmrsPorts);
@@ -446,6 +481,11 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         } // no DMRS/PTRS in symbol  
       } // symbol loop
     }// layer loop
+#ifdef TIME_STATISTIC
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[dlsch_resource_mapping_stats] cost time = %lf\n",time_total);
+#endif
     stop_meas(&gNB->dlsch_resource_mapping_stats);
 
     ///Layer Precoding and Antenna port mapping
@@ -456,7 +496,9 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     // The Precoding matrix:
     // The Codebook Type I
     start_meas(&gNB->dlsch_precoding_stats);
-
+#ifdef TIME_STATISTIC
+    gettimeofday(&st, NULL);
+#endif
     for (int ap=0; ap<frame_parms->nb_antennas_tx; ap++) {
 
       for (int l=rel15->StartSymbolIndex; l<rel15->StartSymbolIndex+rel15->NrOfSymbols; l++) {
@@ -541,7 +583,11 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         } //RB loop
       } // symbol loop
     }// port loop
-
+#ifdef TIME_STATISTIC
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[dlsch_precoding_stats] cost time = %lf\n",time_total);
+#endif
     stop_meas(&gNB->dlsch_precoding_stats);
     dlsch->slot_tx[slot]=0;
 

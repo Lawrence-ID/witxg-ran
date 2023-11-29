@@ -34,6 +34,7 @@ This section deals with basic functions for OFDM Modulation.
 #include "PHY/defs_gNB.h"
 #include "PHY/impl_defs_top.h"
 #include "common/utils/LOG/log.h"
+#include "common/utils/LOG/px_log.h"
 #include "common/utils/LOG/vcd_signal_dumper.h"
 #include "modulation_common.h"
 #include "PHY/LTE_TRANSPORT/transport_common_proto.h"
@@ -203,6 +204,9 @@ void PHY_ofdm_mod(int *input,                       /// pointer to complex input
     printf("[PHY] symbol %d/%d offset %d (%p,%p -> %p)\n",i,nb_symbols,i*fftsize+(i*nb_prefix_samples),input,&input[i*fftsize],&output[(i*fftsize) + ((i)*nb_prefix_samples)]);
 #endif
 
+#ifdef TIME_STATISTIC
+    gettimeofday(&st, NULL);
+#endif
 #ifndef __AVX2__
     // handle 128-bit alignment for 128-bit SIMD (SSE4,NEON,AltiVEC)
     idft(idftsize,(int16_t *)&input[i*fftsize],
@@ -215,7 +219,11 @@ void PHY_ofdm_mod(int *input,                       /// pointer to complex input
          1);
 
 #endif
-
+#ifdef TIME_STATISTIC
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[%s] cost time = %lf\n", ANSI_FMT("PHY_ofdm_mod:idft", ANSI_FG_CYAN), time_total);
+#endif
     // Copy to frame buffer with Cyclic Extension
     // Note:  will have to adjust for synchronization offset!
 
