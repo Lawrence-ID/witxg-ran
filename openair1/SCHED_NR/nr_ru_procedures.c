@@ -38,6 +38,7 @@
 #include "PHY/LTE_TRANSPORT/if5_tools.h"
 
 #include "common/utils/LOG/log.h"
+#include "common/utils/LOG/px_log.h"
 #include "common/utils/system.h"
 #include "common/utils/LOG/vcd_signal_dumper.h"
 
@@ -61,6 +62,9 @@ void nr_feptx0(RU_t *ru,int tti_tx,int first_symbol, int num_symbols, int aa) {
 
 
   //VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_RU_FEPTX_OFDM+(first_symbol!=0?1:0) , 1 );
+  #ifdef TIME_STATISTIC_2
+    gettimeofday(&st, NULL);
+  #endif
 
   slot_offset  = fp->get_samples_slot_timestamp(slot,fp,0);
   slot_offsetF = first_symbol*fp->ofdm_symbol_size;
@@ -134,7 +138,11 @@ void nr_feptx0(RU_t *ru,int tti_tx,int first_symbol, int num_symbols, int aa) {
     }
   }
 
-        
+  #ifdef TIME_STATISTIC_2
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[%s] cost time = %lf\n", ANSI_FMT("nr_feptx0", ANSI_FG_YELLOW), time_total);
+  #endif
   //VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_RU_FEPTX_OFDM+(first_symbol!=0?1:0), 0);
 }
 
@@ -419,13 +427,19 @@ void nr_feptx_ofdm(RU_t *ru,int frame_tx,int tti_tx) {
   if (nr_slot_select(cfg,frame_tx,slot) == NR_UPLINK_SLOT) return;
 
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_RU_FEPTX_OFDM , 1 );
+  
   start_meas(&ru->ofdm_mod_stats);
 
-
     //    LOG_D(HW,"Frame %d: Generating slot %d\n",frame,next_slot);
-
+  #ifdef TIME_STATISTIC_2
+    gettimeofday(&st, NULL);
+  #endif
   nr_feptx0(ru,slot,0,NR_NUMBER_OF_SYMBOLS_PER_SLOT,aa);
-
+  #ifdef TIME_STATISTIC_2
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[%s] cost time = %lf\n", ANSI_FMT("PHY_PROCEDURES_RU_FEPTX_OFDM", ANSI_FG_YELLOW), time_total);
+  #endif
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_RU_FEPTX_OFDM , 0 );
   stop_meas(&ru->ofdm_mod_stats);
 

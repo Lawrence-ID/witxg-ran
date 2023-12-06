@@ -196,17 +196,22 @@ void PHY_ofdm_mod(int *input,                       /// pointer to complex input
       fftsize,nb_prefix_samples,nb_symbols,input,output);
 #endif
 
-
+#ifdef TIME_STATISTIC_1
+    Log("[PHY] OFDM mod (size %d,prefix %d) Symbols %d, input %p, output %p\n",
+      fftsize,nb_prefix_samples,nb_symbols,input,output);
+    gettimeofday(&st, NULL);
+#endif
 
   for (i=0; i<nb_symbols; i++) {
+
+#ifdef TIME_STATISTIC_0
+    gettimeofday(&st, NULL);
+#endif
 
 #ifdef DEBUG_OFDM_MOD
     printf("[PHY] symbol %d/%d offset %d (%p,%p -> %p)\n",i,nb_symbols,i*fftsize+(i*nb_prefix_samples),input,&input[i*fftsize],&output[(i*fftsize) + ((i)*nb_prefix_samples)]);
 #endif
 
-#ifdef TIME_STATISTIC
-    gettimeofday(&st, NULL);
-#endif
 #ifndef __AVX2__
     // handle 128-bit alignment for 128-bit SIMD (SSE4,NEON,AltiVEC)
     idft(idftsize,(int16_t *)&input[i*fftsize],
@@ -218,11 +223,6 @@ void PHY_ofdm_mod(int *input,                       /// pointer to complex input
          (int16_t *)temp,
          1);
 
-#endif
-#ifdef TIME_STATISTIC
-    gettimeofday(&ed, NULL);
-    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
-    Log("[%s] cost time = %lf\n", ANSI_FMT("PHY_ofdm_mod:idft", ANSI_FG_CYAN), time_total);
 #endif
     // Copy to frame buffer with Cyclic Extension
     // Note:  will have to adjust for synchronization offset!
@@ -286,10 +286,18 @@ void PHY_ofdm_mod(int *input,                       /// pointer to complex input
       break;
 
     }
-
-
+    #ifdef TIME_STATISTIC_0
+      gettimeofday(&ed, NULL);
+      time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+      Log("[%s] size %d, cost time = %lf\n", ANSI_FMT("idft_once", ANSI_FG_CYAN), fftsize, time_total);
+    #endif
 
   }
+  #ifdef TIME_STATISTIC_1
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[%s] cost time = %lf\n", ANSI_FMT("PHY_ofdm_mod_idft", ANSI_FG_CYAN), time_total);
+  #endif
 
 
 }

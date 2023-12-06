@@ -132,7 +132,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     unsigned char output[rel15->rbSize * NR_SYMBOLS_PER_SLOT * NR_NB_SC_PER_RB * Qm * rel15->nrOfLayers] __attribute__((aligned(32)));
     bzero(output,rel15->rbSize * NR_SYMBOLS_PER_SLOT * NR_NB_SC_PER_RB * Qm * rel15->nrOfLayers);
     start_meas(dlsch_encoding_stats);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&st, NULL);
 #endif
     if (nr_dlsch_encoding(gNB,
@@ -141,7 +141,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
                           dlsch_interleaving_stats,
                           dlsch_segmentation_stats) == -1)
       return;
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&ed, NULL);
     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
     Log("[nr_dlsch_encoding] cost time = %lf\n",time_total);
@@ -169,7 +169,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     for (int q=0; q<rel15->NrOfCodewords; q++) {
       /// scrambling
       start_meas(dlsch_scrambling_stats);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
       gettimeofday(&st, NULL);
 #endif
       uint32_t scrambled_output[(encoded_length>>5)+4]; // modulator acces by 4 bytes in some cases
@@ -190,7 +190,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         printf("\n");
       }
 #endif
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
       gettimeofday(&ed, NULL);
       time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
       Log("[nr_pdsch_codeword_scrambling] cost time = %lf\n",time_total);
@@ -199,7 +199,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
 
       /// Modulation
       start_meas(dlsch_modulation_stats);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
       gettimeofday(&st, NULL);
 #endif
       nr_modulation(scrambled_output,
@@ -207,7 +207,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
                     Qm,
                     mod_symbs[q]);
       VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_gNB_PDSCH_MODULATION, 0);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
       gettimeofday(&ed, NULL);
       time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
       Log("[nr_modulation] cost time = %lf\n",time_total);
@@ -226,7 +226,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     
     start_meas(&gNB->dlsch_layer_mapping_stats); 
     /// Layer mapping
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&st, NULL);
 #endif
     nr_layer_mapping(mod_symbs,
@@ -244,7 +244,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         printf("\n");
       }
 #endif
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&ed, NULL);
     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
     Log("[nr_layer_mapping] cost time = %lf\n",time_total);
@@ -269,7 +269,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
 #endif
 
     start_meas(&gNB->dlsch_resource_mapping_stats);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&st, NULL);
 #endif
     for (int nl=0; nl<rel15->nrOfLayers; nl++) {
@@ -481,7 +481,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         } // no DMRS/PTRS in symbol  
       } // symbol loop
     }// layer loop
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&ed, NULL);
     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
     Log("[dlsch_resource_mapping_stats] cost time = %lf\n",time_total);
@@ -496,7 +496,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
     // The Precoding matrix:
     // The Codebook Type I
     start_meas(&gNB->dlsch_precoding_stats);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&st, NULL);
 #endif
     for (int ap=0; ap<frame_parms->nb_antennas_tx; ap++) {
@@ -583,7 +583,7 @@ void nr_generate_pdsch(processingData_L1tx_t *msgTx,
         } //RB loop
       } // symbol loop
     }// port loop
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&ed, NULL);
     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
     Log("[dlsch_precoding_stats] cost time = %lf\n",time_total);

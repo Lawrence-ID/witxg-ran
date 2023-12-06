@@ -30,6 +30,7 @@
 #include "nfapi/open-nFAPI/nfapi/public_inc/nfapi_nr_interface.h"
 #include "fapi_nr_l1.h"
 #include "common/utils/LOG/log.h"
+#include "common/utils/LOG/px_log.h"
 #include "common/utils/LOG/vcd_signal_dumper.h"
 #include "PHY/INIT/phy_init.h"
 #include "PHY/MODULATION/nr_modulation.h"
@@ -128,7 +129,9 @@ void phy_procedures_gNB_TX(processingData_L1tx_t *msgTx,
       (nr_slot_select(cfg,frame,slot) == NR_UPLINK_SLOT)) return;
 
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_gNB_TX+offset,1);
-
+  #ifdef TIME_STATISTIC_2
+    gettimeofday(&st, NULL);
+  #endif
   // clear the transmit data array and beam index for the current slot
   for (aa=0; aa<cfg->carrier_config.num_tx_ant.value; aa++) {
     memset(&gNB->common_vars.txdataF[aa][txdataF_offset],0,fp->samples_per_slot_wCP*sizeof(int32_t));
@@ -163,7 +166,15 @@ void phy_procedures_gNB_TX(processingData_L1tx_t *msgTx,
   if (msgTx->num_pdsch_slot > 0) {
     VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_GENERATE_DLSCH,1);
     LOG_D(PHY, "PDSCH generation started (%d) in frame %d.%d\n", msgTx->num_pdsch_slot,frame,slot);
+    #ifdef TIME_STATISTIC_1
+      gettimeofday(&st, NULL);
+    #endif
     nr_generate_pdsch(msgTx, frame, slot);
+    #ifdef TIME_STATISTIC_1
+      gettimeofday(&ed, NULL);
+      time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+      Log("[%s] cost time = %lf\n", ANSI_FMT("nr_generate_pdsch_func", ANSI_FG_YELLOW), time_total);
+    #endif
     VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_GENERATE_DLSCH,0);
   }
 
@@ -183,7 +194,11 @@ void phy_procedures_gNB_TX(processingData_L1tx_t *msgTx,
   for (aa=0; aa<cfg->carrier_config.num_tx_ant.value; aa++) {
     apply_nr_rotation(fp,(int16_t*) &gNB->common_vars.txdataF[aa][txdataF_offset],slot,0,fp->Ncp==EXTENDED?12:14,fp->ofdm_symbol_size);
   }
-
+  #ifdef TIME_STATISTIC_2
+    gettimeofday(&ed, NULL);
+    time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+    Log("[%s] cost time = %lf\n", ANSI_FMT("PHY_PROCEDURES_gNB_TX", ANSI_FG_YELLOW), time_total);
+  #endif
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_gNB_TX+offset,0);
 }
 

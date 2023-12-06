@@ -3,15 +3,14 @@
 #define __PX_LOG_H__
 
 #include <sys/time.h>
+#include <sys/types.h>
+#include <stdio.h>
+#include <unistd.h>
 
-#ifndef TIME_STATISTIC
-#define TIME_STATISTIC // 若不需要统计时间，注释此行即可
-#endif
+#define TIME_STATISTIC_2 // 若不需要统计时间，注释此行即可
 
-#ifdef TIME_STATISTIC
 static struct timeval st, ed;
 static double time_total;
-#endif
 
 #define ANSI_FG_BLACK   "\33[1;30m"
 #define ANSI_FG_RED     "\33[1;31m"
@@ -39,8 +38,22 @@ static double time_total;
   } while (0)
 
 #define Log(format, ...) \
-    _Log(ANSI_FMT("[%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
-        __FILE__, __LINE__, __func__, ## __VA_ARGS__)
+    _Log(ANSI_FMT("PID:%d [%s:%d %s] " format, ANSI_FG_BLUE) "\n", \
+        getpid(), __FILE__, __LINE__, __func__, ## __VA_ARGS__)
 
 #endif
+
+// static inline void start_time_statistic(){
+//   #ifdef TIME_STATISTIC
+//     gettimeofday(&st, NULL);
+//   #endif
+// }
+
+// static inline void end_time_statistic(char *str){
+//   #ifdef TIME_STATISTIC
+//     gettimeofday(&ed, NULL);
+//     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
+//     Log("[%s] cost time = %lf\n", ANSI_FMT(s, ANSI_FG_YELLOW), time_total);
+//   #endif
+// }
 // -------------------px_Log--------------------

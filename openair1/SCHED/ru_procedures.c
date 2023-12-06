@@ -312,7 +312,6 @@ void feptx_ofdm(RU_t *ru,
   int16_t *txdata;
 
 //  int CC_id = ru->proc.CC_id;
-
   VCD_SIGNAL_DUMPER_DUMP_FUNCTION_BY_NAME(VCD_SIGNAL_DUMPER_FUNCTIONS_PHY_PROCEDURES_RU_FEPTX_OFDM+ru->idx , 1 );
   slot_offset_F = 0;
 

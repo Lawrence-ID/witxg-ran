@@ -19,12 +19,13 @@ while read -r line; do
       max_value=$last_column
     fi
   else
-    echo "Warning: Skipping invalid entry - $line"
+    # echo "Warning: Skipping invalid entry - $line"
+    echo -n ""
   fi
 done
 
 # 计算平均值
-if [ "$count" -gt 0 ]; then
+if [[ "$count" -gt 0 ]]; then
   average=$(awk "BEGIN {print $total / $count}")
   echo "Average: $average, Minimum: $min_value, Maximum: $max_value"
 else

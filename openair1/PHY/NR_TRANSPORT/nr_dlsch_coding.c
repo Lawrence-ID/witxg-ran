@@ -224,11 +224,11 @@ void ldpc8blocks( void *p) {
   uint8_t tmp[8][68 * 384]__attribute__((aligned(32)));
   for (int rr=impp->macro_num*8, i=0; rr < impp->n_segments && rr < (impp->macro_num+1)*8; rr++,i++ )
     impp->d[rr]=tmp[i];
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
   gettimeofday(&st, NULL);
 #endif
   nrLDPC_encoder(harq->c,impp->d,*impp->Zc, impp->Kb,Kr,impp->BG,impp);  
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
   gettimeofday(&ed, NULL);
   time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
   Log("[nrLDPC_encoder] cost time = %lf\n",time_total);
@@ -262,7 +262,7 @@ void ldpc8blocks( void *p) {
 
     uint8_t e[E];
     bzero (e, E);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&st, NULL);
 #endif
     nr_rate_matching_ldpc(Tbslbrm,
@@ -275,7 +275,7 @@ void ldpc8blocks( void *p) {
                           Kr-impp->F-2*(*impp->Zc),
                           rel15->rvIndex[0],
                           E);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&ed, NULL);
     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
     Log("[nr_rate_matching_ldpc] cost time = %lf\n",time_total);
@@ -301,14 +301,14 @@ void ldpc8blocks( void *p) {
       printf("output ratematching e[%d]= %d r_offset %u\n", i,e[i], r_offset);
 
 #endif
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&st, NULL);
 #endif
     nr_interleaving_ldpc(E,
                          mod_order,
                          e,
                          impp->output+r_offset);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
     gettimeofday(&ed, NULL);
     time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
     Log("[nr_interleaving_ldpc] cost time = %lf\n",time_total);
@@ -370,7 +370,7 @@ int nr_dlsch_encoding(PHY_VARS_gNB *gNB,
   }
 
   int max_bytes = MAX_NUM_NR_DLSCH_SEGMENTS_PER_LAYER*rel15->nrOfLayers*1056;
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
   gettimeofday(&st, NULL);
 #endif
   if (A > 3824) {
@@ -405,7 +405,7 @@ int nr_dlsch_encoding(PHY_VARS_gNB *gNB,
                 max_bytes);
     memcpy(harq->b, a, (A / 8) + 3); // using 3 bytes to mimic the case of 24 bit crc
   }
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
   gettimeofday(&ed, NULL);
   time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
   Log("[CRC] cost time = %lf\n",time_total);
@@ -421,11 +421,11 @@ int nr_dlsch_encoding(PHY_VARS_gNB *gNB,
     impp.BG = 1;
 
   start_meas(dlsch_segmentation_stats);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
   gettimeofday(&st, NULL);
 #endif
   impp.Kb = nr_segmentation(harq->b, harq->c, harq->B, &impp.n_segments, &impp.K, impp.Zc, &impp.F, impp.BG);
-#ifdef TIME_STATISTIC
+#ifdef TIME_STATISTIC_0
   gettimeofday(&ed, NULL);
   time_total = (ed.tv_sec - st.tv_sec) * 1000000 + (ed.tv_usec - st.tv_usec); //us
   Log("[nr_segmentation] cost time = %lf\n",time_total);
