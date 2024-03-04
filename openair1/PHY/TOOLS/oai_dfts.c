@@ -63,9 +63,216 @@ const static int16_t conjugatedft[32] __attribute__((aligned(32))) = {-1,1,-1,1,
 
 const static int16_t reflip[32]  __attribute__((aligned(32))) = {1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1,1,-1};
 
+#ifdef fpga
+//-----fpga include---------
+static unsigned char *h2c_align_mem_tmp;
+static unsigned char *c2h_align_mem_tmp;
+
+#define MAP_SIZE (1024*1024UL)
+#define MAP_MASK (MAP_SIZE - 1)
+#define POINT_NUM 512
+
+#define FPGA_AXI_START_ADDR (0)
+#define FPGA_AXI_CLEAR (32768)
+
+#define FPGA_CONTROL_ADDR 32768 //64= (8193-1)*4 || 4是指字节，17-1指控制位在第17个数 
+#define CONTROL_DATA 1
 
 
+int c2h_dma_fd;
+int h2c_dma_fd;
 
+const unsigned int len = (POINT_NUM * 2 + 1) * 4;    //2^15，len的含义是需要多少个实部/虚部
+const unsigned int lendata = (POINT_NUM * 2 + 1);
+
+void put_data_to_fpga_ddr(unsigned int fpga_ddr_addr,int *buffer,unsigned int len)
+{
+    lseek(h2c_dma_fd,fpga_ddr_addr,SEEK_SET);
+    write(h2c_dma_fd,buffer,len);
+}
+
+void get_data_from_fpga_ddr(unsigned int fpga_ddr_addr,int  *buffer,unsigned int len)
+{
+    lseek(c2h_dma_fd,fpga_ddr_addr,SEEK_SET);
+    read(c2h_dma_fd,buffer,len);//32个字节,256位
+}
+
+int pcie_init()
+{
+    c2h_dma_fd = open("/dev/xdma0_c2h_0",O_RDWR | O_NONBLOCK);
+    if(c2h_dma_fd < 0)
+        return -1;
+    h2c_dma_fd = open("/dev/xdma0_h2c_0",O_RDWR );
+    if(h2c_dma_fd < 0)
+        return -2;
+    posix_memalign((void *)&h2c_align_mem_tmp,4096,0x800000);
+    posix_memalign((void *)&c2h_align_mem_tmp,4096,0x800000);
+
+    if(NULL == h2c_align_mem_tmp || NULL == c2h_align_mem_tmp)
+        return -6;
+
+    return 1;
+}
+
+void pcie_deinit()
+{
+    close(c2h_dma_fd);
+    close(h2c_dma_fd);
+    //close(control_fd);
+}
+
+unsigned char write_fftdata(void *buf ,unsigned int type,char*fname){
+    
+    FILE *fpread=fopen(fname,"w");
+    if(fpread == NULL)  assert(0);
+    if(type==1){
+        //打印int_8
+        int8_t *buf1 = (int8_t*)(buf);
+        for(unsigned int i=0;i<lendata;i++) fprintf(fpread, "%hhd\n",(buf1[i]));
+    }
+    else if(type==2){
+        //打印int_16
+        int16_t *buf1 = (int16_t*)(buf);
+        for(unsigned int i=0;i<lendata;i++) fprintf(fpread, "%hd\n",(buf1[i]));
+    }
+    else if(type==3){
+        //打印int_32
+        int32_t *buf1 = (int32_t*)(buf);
+        for(unsigned int i=0;i<lendata;i++) fprintf(fpread, "%d\n",(buf1[i]));
+    }
+    else {
+        printf("type wrong . check write_dedata parameters.");
+    }
+    fclose (fpread);
+    return 0;
+}
+unsigned char read_fftdata_int(int *buf1){
+    FILE *fpread=fopen("/home/g/fpga/pcie/fft_hu/fft/fft_data/ifft_oai_in.txt","r");
+    // FILE *fpread=fopen("/home/g/fpga/pcie/fft_hu/fft/music_in1.txt","r");
+    if(fpread == NULL)  return 1;
+    for(int i=0;i<lendata;i++) {
+        fscanf(fpread, "%d", &buf1[i]);
+        // printf("buf[%d]=%d",i,buf1[i]);
+    }
+    fclose (fpread);
+    return 0;
+}
+void ifft512_nr_fpga(int16_t*in_buf,int16_t*out_buf,unsigned char scale_flag){
+    int in_size = 512*2+1;
+    int in_size_bytes = in_size*4;
+    // int *in_buf_fpga = (int *)malloc(sizeof(int)*in_size);
+    // int *out_buf_fpga = (int *)malloc(sizeof(int)*in_size);
+    int *in_buf_fpga  = NULL;
+    int *out_buf_fpga = NULL;
+    posix_memalign((void **)&in_buf_fpga, 4096 , 1024*1024);
+    posix_memalign((void **)&out_buf_fpga, 4096 , 1024*1024);
+    char * fname_fpga_out = "fft_out_fpga_original.txt";
+    char * fname_fpga_in = "fft_in_fpga_original.txt";
+    int i;
+    //convert int16 to int 
+    for(i=0;i<in_size-1 ;i++){
+        in_buf_fpga[i] = (int)in_buf[i];
+    }
+    in_buf_fpga[in_size-1] = 963; // ifft start flag
+    memset(out_buf_fpga,0,in_size_bytes);
+    //put int data into fpga
+    // write_fftdata(in_buf_fpga,3,fname_fpga_in);
+    while(!pcie_init());
+    put_data_to_fpga_ddr(FPGA_AXI_START_ADDR,in_buf_fpga,in_size_bytes);
+    //get int data in fpga
+    get_data_from_fpga_ddr(FPGA_AXI_START_ADDR,out_buf_fpga,in_size_bytes);
+    // write_fftdata(out_buf_fpga,3,fname_fpga_out);
+    //convert int to int16 and shuffle
+    for(i=0;i<8;i++){
+        for(int k=0;k<8;k++){
+            out_buf[2*(i+8*k)]       =  (int16_t)(out_buf_fpga[2*(8*k+64*i)]    /22) ;
+            out_buf[2*(i+8*k)+1]     =  (int16_t)(out_buf_fpga[2*(8*k+64*i)+1]  /22) ;
+            out_buf[2*(i+8*k+64 )]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+1)]  /22) ;
+            out_buf[2*(i+8*k+64 )+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+1)+1]/22) ;
+            out_buf[2*(i+8*k+128)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+2)]  /22) ;
+            out_buf[2*(i+8*k+128)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+2)+1]/22) ;
+            out_buf[2*(i+8*k+192)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+3)]  /22) ;
+            out_buf[2*(i+8*k+192)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+3)+1]/22) ;
+            out_buf[2*(i+8*k+256)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+4)]  /22) ;
+            out_buf[2*(i+8*k+256)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+4)+1]/22) ;
+            out_buf[2*(i+8*k+320)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+5)]  /22) ;
+            out_buf[2*(i+8*k+320)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+5)+1]/22) ;
+            out_buf[2*(i+8*k+384)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+6)]  /22) ;
+            out_buf[2*(i+8*k+384)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+6)+1]/22) ;
+            out_buf[2*(i+8*k+448)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+7)]  /22) ;
+            out_buf[2*(i+8*k+448)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+7)+1]/22) ;
+        }
+    }
+    //free temporary space 
+    free(in_buf_fpga);
+    free(out_buf_fpga);
+
+}
+void fft512_nr_fpga(int16_t*in_buf,int16_t*out_buf,unsigned char scale_flag){
+    //convert int16 to int 
+    int in_size = 512*2+1;
+    int in_size_bytes = in_size*4;
+    int *in_buf_fpga = (int *)malloc(sizeof(int)*in_size);
+    int *out_buf_fpga = (int *)malloc(sizeof(int)*in_size);
+    int i;
+    for(i=0;i<in_size-1 ;i++){
+        in_buf_fpga[i] = (int)in_buf[i];
+    }
+    memset(out_buf_fpga,0,in_size_bytes);
+
+    in_buf_fpga[in_size-1] = 975; // ifft start flag
+    //put int data into fpga
+    put_data_to_fpga_ddr(FPGA_AXI_START_ADDR,in_buf_fpga,in_size_bytes);
+    //get int data in fpga
+    get_data_from_fpga_ddr(FPGA_AXI_START_ADDR,out_buf_fpga,in_size_bytes);
+
+    //convert int to int16 and shuffle
+    for(i=0;i<8;i++){
+        for(int k=0;k<8;k++){
+            out_buf[2*(i+8*k)]       =  (int16_t)(out_buf_fpga[2*(8*k+64*i)]    /22) ;
+            out_buf[2*(i+8*k)+1]     =  (int16_t)(out_buf_fpga[2*(8*k+64*i)+1]  /22) ;
+            out_buf[2*(i+8*k+64 )]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+1)]  /22) ;
+            out_buf[2*(i+8*k+64 )+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+1)+1]/22) ;
+            out_buf[2*(i+8*k+128)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+2)]  /22) ;
+            out_buf[2*(i+8*k+128)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+2)+1]/22) ;
+            out_buf[2*(i+8*k+192)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+3)]  /22) ;
+            out_buf[2*(i+8*k+192)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+3)+1]/22) ;
+            out_buf[2*(i+8*k+256)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+4)]  /22) ;
+            out_buf[2*(i+8*k+256)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+4)+1]/22) ;
+            out_buf[2*(i+8*k+320)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+5)]  /22) ;
+            out_buf[2*(i+8*k+320)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+5)+1]/22) ;
+            out_buf[2*(i+8*k+384)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+6)]  /22) ;
+            out_buf[2*(i+8*k+384)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+6)+1]/22) ;
+            out_buf[2*(i+8*k+448)]   =  (int16_t)(out_buf_fpga[2*(8*k+64*i+7)]  /22) ;
+            out_buf[2*(i+8*k+448)+1] =  (int16_t)(out_buf_fpga[2*(8*k+64*i+7)+1]/22) ;
+        }
+    }
+    //free temporary space 
+    free(in_buf_fpga);
+    free(out_buf_fpga);
+    sleep(1);
+
+}
+
+void test_buf_int(){
+    char * fname_fpga_out = "test_buf_int_out.txt";
+    char * fname_fpga_in  = "test_buf_int_in.txt";
+    int  *buf1 = NULL;
+    posix_memalign((void **)&buf1, 4096 , 1024*1024);
+    int  *test_buf = NULL;
+    posix_memalign((void **)&test_buf, 4096 , 1024*1024);
+    //time measure
+
+    while(!(pcie_init()==1));      	    printf("pcie init is ok\n");
+    while(read_fftdata_int(buf1));          //read one group of data
+    write_fftdata(buf1,3,fname_fpga_in);
+    put_data_to_fpga_ddr(FPGA_AXI_START_ADDR,buf1,len);
+    get_data_from_fpga_ddr(FPGA_AXI_START_ADDR,test_buf,len);
+    write_fftdata(test_buf,3,fname_fpga_out);
+}
+
+//--------------------------
+#endif
 
 
 #if defined(__x86_64__) || defined(__i386__) || defined SIMDE_ENABLE_NATIVE_ALIASES
@@ -10624,6 +10831,10 @@ void dft(uint8_t sizeidx, int16_t *input,int16_t *output,unsigned char scale_fla
 };
 
 void idft(uint8_t sizeidx, int16_t *input,int16_t *output,unsigned char scale_flag){
+  char * fname_x86_out = "fft_out_x86.txt";
+  char * fname_x86_in = "fft_in_x86.txt";
+  char * fname_fpga_out = "ifft_out_fpga.txt";
+  char * fname_fpga_in = "ifft_in_fpga.txt";
 	AssertFatal((sizeidx>=0 && sizeidx<DFT_SIZE_IDXTABLESIZE),"Invalid idft size index %i\n",sizeidx);
         int algn=0xF;
         #ifdef __AVX2__
@@ -10636,8 +10847,21 @@ void idft(uint8_t sizeidx, int16_t *input,int16_t *output,unsigned char scale_fl
           int16_t tmp[sz*2] __attribute__ ((aligned(32))); // input and output are not in right type (int16_t instead of c16_t)
           memcpy(tmp, input, sizeof tmp);
           dft_ftab[sizeidx].func(tmp,output,scale_flag);
-        } else
-          idft_ftab[sizeidx].func(input,output,scale_flag);
+          printf("dft_ftab : idft\n");
+        } else{
+          // printf("idfting,sizeidx=%d\n",sizeidx);
+          // if(sizeidx==3){
+          //   // write_fftdata(input,2,fname_fpga_in);
+          //   ifft512_nr_fpga(input,output,scale_flag);
+          //   printf("idft_512 fpga : idft\n");
+          //   }
+          // // }
+          // else{
+            // write_fftdata(input,2,fname_x86_in);    
+            idft_ftab[sizeidx].func(input,output,scale_flag);
+            // write_fftdata(output,2,fname_fpga_out);
+          // }
+        }
 };
 
 #endif

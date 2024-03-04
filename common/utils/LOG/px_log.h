@@ -7,7 +7,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define TIME_STATISTIC_2 // 若不需要统计时间，注释此行即可
+#define SHOW_PX_LOG 0 // 1: 输出Log，0: 不输出Log
+
+// #define TIME_STATISTIC_2 // 若不需要统计时间，注释此行即可
 
 static struct timeval st, ed;
 static double time_total;
@@ -34,7 +36,7 @@ static double time_total;
 
 #define _Log(...) \
   do { \
-    printf(__VA_ARGS__); \
+    if(SHOW_PX_LOG == 1) { printf(__VA_ARGS__); } \
   } while (0)
 
 #define Log(format, ...) \
